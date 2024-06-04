@@ -26,7 +26,7 @@ See individual **.asm** files for notes on their level of completeness.
 
 Use the "icl" directive in MADS to include these files in your progam:
 
- icl 'DLIST.asm'
+    icl 'DLIST.asm'
 
 ### Repository Intent
 In my own projects, I consume these files as a Git submodule within each parent project's repository.  Thus the file organization is flat (intended to clone to an /includes sub-directory/repository within the consuming project(s)).  This has no direct implications on *this* repository; you can copy the files directly to your own repository in a structure you wish.
