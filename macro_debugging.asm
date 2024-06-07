@@ -26,10 +26,16 @@
 ; MacroDebugPrint - Prints the specified message if MACRO DEBUGGING is enabled.
 ;
 ; Avoids every macro debugging print statement having to be surrounded by:
-; .ifdef macro_debugging/.endif blocks.
+; .ifdef macro_debugging/.endif blocks or commenting out .print statements.
 
 ; Can be called with either '' or "" enclosed strings.  Using '' will result
 ; in the enclosing quotes being included in the output.
+
+; The string argument can be passed with embedded MACRO arguments in the form:
+;
+;     MacroDebugPrint "Output DL_BLANK_LINES :value"
+;
+; where ":value" is an argument to the *calling* macro.
 
 .macro MacroDebugPrint string
 	.ifdef macro_debugging
