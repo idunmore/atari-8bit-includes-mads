@@ -37,12 +37,17 @@
 ;
 ; where ":value" is an argument to the *calling* macro.
 
-.macro MacroDebugPrint string
+.macro MacroDebugPrint string value
 	.ifdef macro_debugging
 		; We use the "" form of .print, as it will accept values with
 		; and without both '' or "" ("" strings are passed without
 		; enclosing quotes), since there is no way (I know of) to
 		; test partial contents of a string argument in MADS.
-		.print ":string"
+		.if :0 == 2
+			; If a value is passed, print it.
+			.print ":string ", :value
+		.else
+			.print ":string"
+		.endif
 	.endif
 .endm
