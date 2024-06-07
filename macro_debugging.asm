@@ -21,6 +21,12 @@
 ; debugging and control to be specified independently for Macros vs.
 ; general assembly code.
 
+; Do NOT try and apply these definitions if they are already defined.
+.ifndef _MACRO_DEBUGGING_
+
+; Sentinel to allow detection of prior INCLUSION
+.def _MACRO_DEBUGGING_
+
 ; Macros
 
 ; MacroDebugPrint - Prints the specified message if MACRO DEBUGGING is enabled.
@@ -51,3 +57,5 @@
 		.endif
 	.endif
 .endm
+
+.endif ; _MACRO_DEBUGGING_
