@@ -28,6 +28,10 @@ Use the "icl" directive in MADS to include these files in your progam:
 
     icl 'DLIST.asm'
 
+### Conventions & Standards
+
+Naming conventions and other standards, including file content/organization, use of shadow/hardware registers, etc., can be found in the [Standards and Conventions](https://github.com/idunmore/atari-8bit-includes-mads/blob/main/docs/Standards%20and%20Conventions.md) document.
+
 ### Repository Intent
 In my own projects, I consume these files as a Git submodule within each parent project's repository.  Thus the file organization is flat (intended to clone to an /includes sub-directory/repository within the consuming project(s)).  This has no direct implications on *this* repository; you can copy the files directly to your own repository in a structure you wish.
 
