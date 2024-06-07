@@ -8,6 +8,14 @@
 
 ; Labels are case-insensitive in MADS.
 
+; Do NOT try and apply these definitions if they are already defined.
+.ifndef _COMMON_
+
+; Sentinel to allow detection of prior INCLUSION
+.def _COMMON_
+
 ; True (1) and False (0) labels per MADS values for these conditions.
 TRUE = 1
 FALSE = 0
+
+.endif ; _COMMON_
