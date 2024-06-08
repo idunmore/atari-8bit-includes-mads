@@ -36,7 +36,12 @@ SDLSTH = $0231 ; DLISTH
 .endif ; _ANTIC_
 
 ; DISPLAY LIST INSTRUCTIONS
-;
+
+; Jumps/End of Display List
+
+DL_JUMP =    $01 ; JMP to new address (reloads ANTIC's program counter)
+DL_JUMP_VB = $41 ; JMP to top of dislplay list and wait for Vertical Blank
+
 ; Options and Masks
 ;
 ; MASKs (e.g., MASK_DL_DLI) are ANDed with the DL opcode to DISABLE the option.
@@ -172,6 +177,53 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
                
                 MacroDebugPrint "DL_BLANK_OpCode:", ?value                
         .endif        
+.endm
+
+; Display List JUMP Macros/Instructions
+
+; Both JUMP instructions should be followed by a 2-byte address.  
+
+; DL_JMP - Jump to new address (over a 1KB boundary) and reload ANTIC's
+;          program counter.
+;
+; DL_JMP is usually used to allow splitting a display list across a 1KB boundary
+; as ANTIC's address regiser is only 10 bits wide (1KB or 1024 byts).  Thus,
+; this typically points to a continuation of a display lists.  Use is uncommon,
+; as display lists are usually very short.  Usually the product of very tight
+; memory constraints.
+
+.macro DL_JMP displayListAddress
+        ; Sanity/error checking.
+        .if 0: != 1
+                .error "DL_JMP: Display List address required"
+        .endif
+        
+        MacroDebugPrint "DL_JMP: ", :displayListAddress
+
+        ; Output DL_JUMP instruction and operand
+
+	.byte DL_JUMP             ; ANTIC JMP instruction
+	.word :displayListAddress ; Address to jump to
+.endm
+
+; DL_JVB - Jump to top of dislplay list and wait for Vertical Blank.
+;
+; This is the most common way to end a display list.  It reloads ANTIC's
+; program counter with the address of the top of the display list, and waits
+; for the next Vertical Blank.
+
+.macro DL_JVB displayListAddress
+	; Sanity/error checking.
+        .if 0: != 1
+                .error "DL_JVB: Display List address required"
+        .endif
+        
+        MacroDebugPrint "DL_JVB: ", :displayListAddress
+
+        ; Output DL_JVB instruction and operand
+
+	.byte DL_JVB              ; ANTIC JVB instruction
+	.word :displayListAddress ; Address to jump to
 .endm
 
 .endif ; _DISPLAY_LIST_
