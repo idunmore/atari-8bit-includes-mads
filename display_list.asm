@@ -179,6 +179,111 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
         .endif        
 .endm
 
+; Display List MODE Macros/Instructions
+
+; DL_MODE - Sets the ANTIC display mode for the current graphics line.
+;
+; Allows raw MODE values, as well as modes with DL_DLI, DL_LMS, DL_VSCROLL and
+; DL_HSCROLL options applied (e.g., DL_TEXT_2 | DL_DLI | DL_LMS).
+
+.macro DL_MODE mode
+        ; Sanity/error checking.
+	.if :0 != 1
+		.error "ERROR: DL_MODE requires a mode value"
+	.endif
+
+        ; Valid modes are $02-$0F, so mask off the high nybble ... so we can
+        ; validate the range of modes, without worrying about other mode options
+        ; (i.e., DL_DLI, DL_LMS, DL_VSCROLL and DL_HSCROLL)
+        ?value = [:mode & $0F]
+        .if ?value < DL_TEXT_2 || ?value > DL_BITMAP_F
+                .error "ERROR: DL_MODE invalid mode (must be $02-$0F): ", :1
+        .endif
+        
+        ; :mode is now undisturbed, but validated, so outputting mode as passed
+        ; preserves other options.
+        MacroDebugPrint "DL_MODE: ", :mode
+
+	.byte	:mode   ; Output a BYTE for the Display list mode instruction
+.endm
+
+; Display List MODE and LMS Macros/Instructions
+
+; These macros all deal with MODES that have the DL_LMS bit set.  These require
+; both a MODE instruction/value and the new address for screen memory to be read
+; from (the Memory Scan Address).
+
+; DL_LMS_MODE_ADDR - Creates a MODE line with its LMS bit set, and an LMS
+;                    address WORD following it.
+;
+; This is used when you don't need to manipulate the LMS Address after building
+; the MODE line (or don't care about have to do math on labels to do so; see
+; DL_LMS_MODE and DL_LMS_ADDR for details).
+
+.macro DL_LMS_MODE_ADDR mode, address
+        ; Sanity/error checking.
+        .if :0 != 2
+                .error "ERROR: DL_LMS_MODE_ADDR requires a mode and address"
+        .endif
+        
+        MacroDebugPrint "DL_LMS_MODE_ADDR: mode:", :mode
+        MacroDebugPrint "DL_LMS_MODE_ADDR: address:", :address
+
+        ; Use DL_LMS_MODE and DL_LMS_ADDR to output the MODE and address.
+	DL_LMS_MODE :mode
+        DL_LMS_ADDR :address
+.endm
+
+; DL_LMS_MODE - Creates a MODE line with its LMS bit set.
+;
+; Outputs JUST an ANTIC mode instruction with its LMS bit set.  This is used
+; when you want to manipulate the LMS Address after building the MODE line,
+; (e.g., for scrolling).  Follow this instruction with a DL_LMS_ADDR call.
+
+; Example Usage:
+;
+;       DL_LMS_MODE DL_TEXT_2
+; scrollAddress
+;       DL_LMS_ADDR scroll_data
+;
+; Referencing scroll_address can now be done *directly* vs. using:
+;
+; scrollAddress
+;      DL_LMS_MODE_ADDR DL_TEXT_2, scroll_data
+;      ...
+;      scrollAddress + 1 = lowAddress
+;      scrollAddress + 2 = highAddress
+
+.macro DL_LMS_MODE mode
+        ; Sanity/error checking.
+	.if :0<>1
+		.error "ERROR: DL_LMS_MODE requires graphics mode"
+	.endif
+       
+        MacroDebugPrint "DL_LMS_MODE: ", [:mode | DL_LMS]
+
+        ; Output the DL_MODE instruction with the DL_LMS bit set.  Doesn't
+        ; matter if the mode already has the DL_LMS bit set.	
+	DL_MODE [:mode | DL_LMS]
+.endm
+
+
+; DL_LMS_ADDR - Write an ADDRESS WORD for a preceding DL_LMS_MODE (MODE line
+;               with its LMS bit set.)
+;
+; See DL_LMS_MODE for details on how to use this macro.
+
+.macro DL_LMS_ADDR address
+        ; Sanity/error checking.
+	.if :0<>1
+		.error "ERROR: DL_LMS_ADDR requires LMS address"
+	.endif
+       
+        MacroDebugPrint "DL_LMS_ADDR: ", :address
+
+	.word :address ; Ouput a WORD for the Memory Scan Address
+.endm
+
 ; Display List JUMP Macros/Instructions
 
 ; Both JUMP instructions should be followed by a 2-byte address.  
