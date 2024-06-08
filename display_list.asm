@@ -25,13 +25,50 @@
 
 ; Hardware Registers - Display List Specific
 
+DMACTL = $D400 ; DMA control for display and Player/Missile graphics
 DLISTL = $D402 ; Display List (Low Byte)
 DLISTH = $D403 ; Display List (High Byte)
+WSYNC =  $D40A ; Wait for Horizontal Sync/next scan line
+VCOUNT = $D40B ; (Read) Vertical Scan Line Counter
+NMIEN =  $D40E ; Non-Maskable Interupt (NMI) Enable
+NMIRES = $D40F ; Non-Maskable Interrupt (NMI) Reset
+NMIST =  $D40F ; (Read) Non-Maskable Interrupt Status
 
 ; Shadow Registers - Display List Specific
 
+SDMCTL = $022F ; DMACTL
 SDLSTL = $0230 ; DLISTL
 SDLSTH = $0231 ; DLISTH
+
+; DMACTL/SDMTCL - DMA control register for display and Player/Missile graphics
+
+; MASKs (e.g., MASK_DL_DMA) are ANDed with the DMA setting to DISABLE the option.
+
+MASK_DL_DMA =          %11011111 ; Disable DMA to read the Display List
+MASK_PLAYFIELD_WIDTH = %11111100 ; Disable playfield display/set playfield width
+DISABLE_DL_DMA =       %00000000 ; Disable DMA
+
+; BIT FLAGs (e.g., DL_DLI) are ORed with DMA setting to ENABLE the option.
+
+ENABLE_DL_DMA = %00100000 ; Enable DMA to read the Display List
+
+
+; DMACTL and SDMCTL - Playfield Settings (see ANTIC Graphics Modes, below)
+
+PLAYFIELD_DISABLE =      %00000000 ; No width is the same as no display
+PLAYFIELD_WIDTH_NARROW = %00000001 ; 32 characters/128 color clocks
+PLAYFIELD_WIDTH_NORMAL = %00000010 ; 40 characters/160 color clocks
+PLAYFIELD_WIDTH_WIDE =   %00000011 ; 48 characters/192 color clocks 
+
+; NMIEN (NMIRES and NMIST) - Non-Maskable Interupt (NMI) Reset and Status
+;                            ONLY Display List/Interrupt values (see ANTIC.asm
+;                            for full list of values).
+
+MASK_NMI_DLI = %01111111 ; Enable/Disable Display List Interrupts;
+
+; NMIEN (NMIRES and NMIST) - Enable Non-Maskable Display List Interupts
+
+NMI_DLI = %10000000 ; Enable Display List Interrupts
 
 .endif ; _ANTIC_
 
@@ -46,15 +83,15 @@ DL_JUMP_VB = $41 ; JMP to top of dislplay list and wait for Vertical Blank
 ;
 ; MASKs (e.g., MASK_DL_DLI) are ANDed with the DL opcode to DISABLE the option.
 
-MASK_DL_DLI     = %01111111 ; Display List Interrupt on last scan line of graphics line
-MASK_DL_LMS     = %10111111 ; Load Memory Scan address for this graphics line
+MASK_DL_DLI =     %01111111 ; Display List Interrupt on last scan line of graphics line
+MASK_DL_LMS =     %10111111 ; Load Memory Scan address for this graphics line
 MASK_DL_VSCROLL = %11011111 ; Vertical scrolling for this graphics line
 MASK_DL_HSCROLL = %11101111 ; Horizontal scrolling for this graphics line
 
 ; BIT FLAGs (e.g., DL_DLI) are ORed with the DL opcode to ENABLE the option.
 
-DL_DLI     = %10000000 ; Display List Interrupt on last scan line of graphics line
-DL_LMS     = %01000000 ; Load Memory Scan address for this graphics line
+DL_DLI =     %10000000 ; Display List Interrupt on last scan line of graphics line
+DL_LMS =     %01000000 ; Load Memory Scan address for this graphics line
 DL_VSCROLL = %00100000 ; Vertical scrolling for this graphics line
 DL_HSCROLL = %00010000 ; Horizontal scrolling for this graphics line
 
@@ -125,7 +162,7 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
 ; ensure what is displayed is visible on the screen, by bringing the start of
 ; the display down by 24 scan lines.
 .macro DL_TOP_OVERSCAN
-        DL_BLANK_LINES 24, 0 ; 24 blank scan lines, with DLIs disabled
+        DL_BLANK_LINES 24, FALSE ; 24 blank scan lines, with DLIs disabled
 .endm
 
 ; DL_BLANK_LINES - Creates a specified number of blank scan lines.
