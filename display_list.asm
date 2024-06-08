@@ -11,7 +11,10 @@
         icl 'common.asm'
         icl 'macro_debugging.asm'
 
-; Sentinel to allow other files to detect if this file is already INCLUDED.
+; Do NOT try and apply these definitions if they are already defined.
+.ifndef _DISPLAY_LIST_
+
+; Sentinel to allow detection of prior INCLUSION
 .def _DISPLAY_LIST_
 
 ; Contains a subset of ANTIC registers and values (as defined in ANTIC.asm)
@@ -37,15 +40,47 @@ SDLSTH = $0231 ; DLISTH
 ; Options and Masks
 ;
 ; MASKs (e.g., MASK_DL_DLI) are ANDed with the DL opcode to DISABLE the option.
-MASK_DL_DLI = %01111111 ; Display List Interrupt on last scan line of graphics line
+
+MASK_DL_DLI     = %01111111 ; Display List Interrupt on last scan line of graphics line
+MASK_DL_LMS     = %10111111 ; Load Memory Scan address for this graphics line
+MASK_DL_VSCROLL = %11011111 ; Vertical scrolling for this graphics line
+MASK_DL_HSCROLL = %11101111 ; Horizontal scrolling for this graphics line
 
 ; BIT FLAGs (e.g., DL_DLI) are ORed with the DL opcode to ENABLE the option.
-DL_DLI = %10000000 ; Display List Interrupt on last scan line of graphics line
 
+DL_DLI     = %10000000 ; Display List Interrupt on last scan line of graphics line
+DL_LMS     = %01000000 ; Load Memory Scan address for this graphics line
+DL_VSCROLL = %00100000 ; Vertical scrolling for this graphics line
+DL_HSCROLL = %00010000 ; Horizontal scrolling for this graphics line
 
 ; ANTIC Graphics Modes
 
+; Number of columns/pixels assumes PLAYFIELD WIDTH is NORMAL.  If NARROW, then
+; reduce by 20% (e.g., 40 cols becomes 32 cols, 20 cols becomes 16 cols).  If
+; WIDE, then increase by 20% (e.g., 160 pixels becomes 192 pixels).
+;
+; Display limitations/overscan will result in less VISIBLE columns/pixels in
+; WIDE mode than the theoretical maximum.
+
+; ANTIC Text Modes
+
 DL_TEXT_2 = $02 ; 1.5 colors, 40 cols x 8 scan Lines - 40 bytes/line
+DL_TEXT_3 = $03 ; 1.5 colors, 40 cols x 10 scan Lines - 40 bytes/line
+DL_TEXT_4 = $04 ; 4/5 colors, 40 cols x 8 scan lines - 40 bytes/line
+DL_TEXT_5 = $05 ; 4/5 colors, 40 cols x 16 scan lines - 40 bytes/line
+DL_TEXT_6 = $06 ; 5 colors, 20 cols x 8 scan lines - 20 bytes/line
+DL_TEXT_7 = $07 ; 5 colors, 20 cols x 16 scan lines - 20 bytes/line
+
+; ANTIC Bit-Mapped Modes
+DL_BITMAP_8 = $08 ; 4 color, 40 pixels x 8 scan lines - 10 bytes/line
+DL_BITMAP_9 = $09 ; 2 color, 80 pixels x 4 scan lines - 10 bytes/line
+DL_BITMAP_A = $0A ; 4 color, 80 pixels x 4 scan lines - 20 bytes/line
+DL_BITMAP_B = $0B ; 2 color, 160 pixels x 2 scan lines - 20 bytes/line
+DL_BITMAP_C = $0C ; 2 color, 160 pixels x 1 scan lines - 20 bytes/line
+DL_BITMAP_D = $0D ; 4 color, 160 pixels x 2 scan lines - 40 bytes/line
+DL_BITMAP_E = $0E ; 4 color, 160 pixels x 1 scan lines - 40 bytes/line
+DL_BITMAP_F = $0F ; 1.5 color, 320 pixels x 1 scan lines - 40 bytes/line
+                  ; also used for GTIA modes, with GTIA priority setting.
 
 ; BASIC Graphics Modes
 
@@ -53,6 +88,17 @@ DL_TEXT_2 = $02 ; 1.5 colors, 40 cols x 8 scan Lines - 40 bytes/line
 ; and mapped to the ANTIC mode values as used by the actual display list.
 
 DL_BASIC_0 = DL_TEXT_2
+DL_BASIC_1 = DL_TEXT_6
+DL_BASIC_2 = DL_TEST_7
+DL_BASIC_3 = DL_BITMAP_8
+DL_BASIC_4 = DL_BITMAP_9
+DL_BASIC_5 = DL_BITMAP_A
+DL_BASIC_6 = DL_BITMAP_B
+DL_BASIC_7 = DL_BITMAP_D
+DL_BASIC_8 = DL_BITMAP_F
+DL_BASIC_9 = DL_BITMAP_9 ; Requires GTIA priority mode 
+DL_BASIC_A = DL_BITMAP_A ; Graphics 10 - Requires GTIA priority mode
+DL_BASIC_B = DL_BITMAP_B ; Graphics 11 - Requires GTIA priority mode
 
 ; BLANK scan lines - DL opcode is: (number of blank scan lines - 1) * $10
 
@@ -64,7 +110,6 @@ DL_BLANK_5 = $40 ; 5 Blank scan lines
 DL_BLANK_6 = $50 ; 6 Blank scan lines
 DL_BLANK_7 = $60 ; 7 Blank scan lines
 DL_BLANK_8 = $70 ; 8 Blank scan lines
-
 
 ; Display List Macros
 
@@ -128,3 +173,5 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
                 MacroDebugPrint "DL_BLANK_OpCode:", ?value                
         .endif        
 .endm
+
+.endif ; _DISPLAY_LIST_
