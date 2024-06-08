@@ -64,13 +64,27 @@ PLAYFIELD_WIDTH_WIDE =   %00000011 ; 48 characters/192 color clocks
 ;                            ONLY Display List/Interrupt values (see ANTIC.asm
 ;                            for full list of values).
 
-MASK_NMI_DLI = %01111111 ; Enable/Disable Display List Interrupts;
+MASK_NMIEN_DLI = %01111111 ; Disable Display List Interrupts;
+MASK_NMIEN_VBI = %10111111 ; Disable Vertical Blank Interrupt
 
 ; NMIEN (NMIRES and NMIST) - Enable Non-Maskable Display List Interupts
 
-NMI_DLI = %10000000 ; Enable Display List Interrupts
+NMIEN_DLI = %10000000 ; Enable Display List Interrupts
+NMIEN_VBI = %01000000 ; Enable Vertical Blank Interrupt
 
 .endif ; _ANTIC_
+
+; Contains a subset of OS registers and values (as defined in OS.asm)
+; that relate specifically to display lists.
+;
+; Do NOT define these labels if OS.asm is already included.
+.ifndef _OS_
+
+VDSLST =  $200 ; [WORD] Display List Interrupt Service Routine Vector
+VDSLSTL = $200 ; Display List Interrupt Service Routine Vector (Low Byte)
+VDSLSTH = $201 ; Display List Interrupt Service Routine Vector (High Byte)
+
+.endif  ; _OS_
 
 ; DISPLAY LIST INSTRUCTIONS
 
@@ -154,6 +168,10 @@ DL_BLANK_7 = $60 ; 7 Blank scan lines
 DL_BLANK_8 = $70 ; 8 Blank scan lines
 
 ; Display List Macros
+
+; NOTE: Naming convention for macros in this project is generally to use
+; CamelCase for the macro name.  For these Display List macros, they are
+; all UPPER case; as they are intended to represent Display List INSTRUCTIONS.
 
 ; DL_TOP_OVERSCAN - Creates 24 initial blank lines, to defeat vertical overscan.
 ;
@@ -293,7 +311,7 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
 
 .macro DL_LMS_MODE mode
         ; Sanity/error checking.
-	.if :0<>1
+	.if :0 != 1
 		.error "ERROR: DL_LMS_MODE requires graphics mode"
 	.endif
        
@@ -312,7 +330,7 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
 
 .macro DL_LMS_ADDR address
         ; Sanity/error checking.
-	.if :0<>1
+	.if :0 != 1
 		.error "ERROR: DL_LMS_ADDR requires LMS address"
 	.endif
        
@@ -336,7 +354,7 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
 
 .macro DL_JMP displayListAddress
         ; Sanity/error checking.
-        .if 0: != 1
+        .if :0 != 1
                 .error "DL_JMP: Display List address required"
         .endif
         
@@ -356,7 +374,7 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
 
 .macro DL_JVB displayListAddress
 	; Sanity/error checking.
-        .if 0: != 1
+        .if :0 != 1
                 .error "DL_JVB: Display List address required"
         .endif
         
@@ -366,6 +384,125 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
 
 	.byte DL_JVB              ; ANTIC JVB instruction
 	.word :displayListAddress ; Address to jump to
+.endm
+
+; InstallDisplayList - "Installs" a Display List at the specified address.
+;
+; Points ANTIC to a Display List at the specified address.  Changes occur on
+; the next Vertical Blank (VBI).
+
+.macro InstallDisplayList displayListAddress
+        ; Sanity/error checking.
+        .if :0 != 1
+                .error "ERROR: InstallDisplayList requires a DL address"
+        .endif
+
+        MacroDebugPrint "InstallDisplayList Address:      ", :displayListAddress
+        MacroDebugPrint "InstallDisplayList Address (Lo): ", <:displayListAddress
+        MacroDebugPrint "InstallDisplayList Address (Hi): ", >:displayListAddress
+
+        lda #<:displayListAddress ; Get the low byte of the DL address
+        sta SDLSTL                ; Update the low byte of the DL vector
+        lda #>:displayListAddress ; Get the high byte of the DL address
+        sta SDLSTH                ; Update the high byte of the DLIvector
+.endm
+
+; Display List Interrupt (DLI) Macros
+
+; InstallDLI - Installs a Display List Interrupt (DLI) at the specified address.
+;
+; Installs a Display List Interrupt (DLI) service routine at the specified
+; address, and ENABLES both DL and VB interrupts (since VBIs are enabled by
+; default).
+;
+; Do not use this macro if you need different NMI settings (e.g., no VBI).
+
+.macro InstallDLI dliAddress
+        ; Sanity/error checking.
+        .if :0 != 1
+                .error "ERROR: InstallDLI requires a DLI address"
+        .endif
+
+        MacroDebugPrint "InstallDLI Address:      ", :dliAddress
+        MacroDebugPrint "InstallDLI Address (Lo): ", <:dliAddress
+        MacroDebugPrint "InstallDLI Address (Hi): ", >:dliAddress
+
+        lda #<:dliAddress ; Get the low byte of the DLI address
+        sta VDSLSTL       ; Update the low byte of the DLI vector
+        lda #>:dliAddress ; Get the high byte of the DLI address
+        sta VDSLSTH       ; Update the high byte of the DLI vector
+
+        lda #NMIEN_DLI | NMIEN_VBI ; Enable DLI and VBI interrupts
+        sta NMIEN                  ; Enable the DLI NMI
+.endm
+
+; DisableDLI - Disables Display List Interrupts (DLIs).
+;
+; Disables all Display List Interrupts (DLIs) by setting the NMIEN register
+; to only service the VBI.
+
+.macro DisableDLI
+        lda #NIMEIN_VBI ; Disable DLI by resetting to only VBI.
+        sta NMIEN
+.endm
+
+; ChainDLI - Chains a Display List Interrupt (DLI) to the next DLI address.
+;
+; Chains a Display List Interrupt (DLI) to the next DLI address.  If the current
+; DLI address is known, then the code will only update the high and low bytes if
+; they have changed.  This reduces the number of cycles consumed in the DLI.
+
+.macro ChainDLI nextDLIAddress, currentDLIAddress
+        ; Sanity/error checking.
+	.if :0 < 1
+		.error "ERROR: ChainDLI: requires nextDLIAddress"
+	.endif
+
+        MacroDebugPrint "ChainDLI: nextDLIAddress:      ", :nextDLIAddress
+        MacroDebugPrint "ChainDLI: nextDLIAddress (Lo): ", <:nextDLIAddress
+        MacroDebugPrint "ChainDLI: nextDLIAddress (Hi): ", >:nextDLIAddress
+
+        ; If we only have one argument, then we just stuff in the address
+        ; without trying to optimize the number of instructions used.
+        .if :0 == 1 
+                lda #<:nextDLIAddress ; Low byte of next DLI address
+                sta VDSLSTL           ; Set Low byte of vector
+                lda #>:nextDLIAddress ; High byte of next DLI address
+                sta VDSLSTH           ; Set High byte of vector
+
+                pla ; restore Accumulator
+                rti ; DLI complete
+
+                .exitm
+        .endif
+
+        ; If we have two arguments, we know the address of the current DLI,
+        ; so we can optimize the code by only updating the high and low bytes
+        ; of the next DLI address if they are different.
+        .if :0 == 2
+                MacroDebugPrint "ChainDLI: currentDLIAddress:      ", :currentDLIAddress
+                MacroDebugPrint "ChainDLI: currentDLIAddress (Lo): ", <:currentDLIAddress
+                MacroDebugPrint "ChainDLI: currentDLIAddress (Hi): ", >:currentDLIAddress   
+
+                ; If the same, then no need to change LOW byte.
+                .if <:currentDLIAddress != <:nextDLIAddress 
+                        MacroDebugPrint "ChainDLI: Updating Low Byte of DLI Vector"
+
+                        lda #<:nextDLIAddress ; Low byte of next DLI address
+                        sta VDSLSTL           ; Set Low byte of vector
+                .endif                
+
+                ; If the same, then no need to change high byte.
+                .if >:currentDLIAddress != >:nextDLIAddress 
+                        MacroDebugPrint "ChainDLI: Updating High Byte of DLI Vector"
+
+                        lda #>:nextDLIAddress ; High byte of next DLI address
+                        sta VDSLSTH           ; Set High byte of vector
+                .endif
+
+                pla ; Restore Accumulator
+                rti ; DLI complete
+        .endif
 .endm
 
 .endif ; _DISPLAY_LIST_
