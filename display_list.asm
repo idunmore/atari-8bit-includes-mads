@@ -493,7 +493,7 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
                         sta VDSLSTL           ; Set Low byte of vector
                 .endif                
 
-                ; If the same, then no need to change high byte.
+                ; If the same, then no need to change HIGH byte.
                 .if >:currentDLIAddress != >:nextDLIAddress 
                         MacroDebugPrint "ChainDLI: Updating High Byte of DLI Vector"
 
