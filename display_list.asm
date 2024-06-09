@@ -26,10 +26,12 @@
 ; Hardware Registers - Display List Specific
 
 DMACTL = $D400 ; DMA control for display and Player/Missile graphics
-DLISTL = $D402 ; Display List (Low Byte)
-DLISTH = $D403 ; Display List (High Byte)
+DLISTL = $D402 ; Display List Address (Low Byte)
+DLISTH = $D403 ; Display List Address (High Byte)
+HSCROL = $D404 ; Horizontal Fine Scroll (0 to 16 color clocks).
+VSCROL = $D405 ; Vertical Fine Scroll (0 to 16 scan lines).
 WSYNC =  $D40A ; Wait for Horizontal Sync/next scan line
-VCOUNT = $D40B ; (Read) Vertical Scan Line Counter
+VCOUNT = $D40B ; (Read) Vertical scan line Counter
 NMIEN =  $D40E ; Non-Maskable Interupt (NMI) Enable
 NMIRES = $D40F ; Non-Maskable Interrupt (NMI) Reset
 NMIST =  $D40F ; (Read) Non-Maskable Interrupt Status
@@ -51,7 +53,6 @@ DISABLE_DL_DMA =       %00000000 ; Disable DMA
 ; BIT FLAGs (e.g., DL_DLI) are ORed with DMA setting to ENABLE the option.
 
 ENABLE_DL_DMA = %00100000 ; Enable DMA to read the Display List
-
 
 ; DMACTL and SDMCTL - Playfield Settings (see ANTIC Graphics Modes, below)
 
