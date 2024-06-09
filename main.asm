@@ -11,7 +11,9 @@
 ; Include files, to be assembled (and tested).
 
 	icl 'common.asm'
-	icl 'display_list.asm'
+	icl 'ANTIC.asm'
+	icl 'character_set.asm'
+	icl 'display_list.asm'	
 	icl 'macro_debugging.asm'
 
 ;.def macro_debugging
