@@ -124,10 +124,98 @@ ICAX3Z = $2C ; [BYTE] Aux Info - Byte 3 - Used by BASIC NOTE/POINT commands for
              ;        transfer of disk sector numbers.
 ICAX4Z = $2D ; [BYTE] Aux Info - Byte 4 - see ICAX3Z
 ICAX5Z = $2E ; [BYTE] Aux Info - Byte 5 - The byte being access with the sector
-             ;        inidcated in ICAZ3Z/4Z.  Also used for hte IOCB * 16 (
-             ;        each ICOB is 16 bytes long)
+             ;        inidcated in ICAZ3Z/4Z.  Also used for hte IOCB * 16
+             ;        (each ICOB is 16 bytes long)
 ICAX6Z = $2F ; [BYTE] Aux Info - Byte 6 - Spare byte; also labelled CIOCHR -
              ;        temporary storage for the character byte in the current
              ;        PUT operation
+
+; SIO (Serial Input/Output) and DCB (Device Control Block)
+
+STATUS = $30 ; [BYTE] SIO status value for current/last operation; also used
+             ;        as storage register for timeout, BREAK abort and error
+             ;        values during SIO routines:
+             ;        $01 = Operation complete (no errors)
+             ;        $8A = Device timeout (doesn't respond)
+             ;        $8B = Device NAK (Negative/Non Acknowledgement)
+             ;        $8C = Serial bus input rraming error
+             ;        $8E = Serial bus data frame overrun error
+             ;        $8F = Serial bus data frame checksum error
+             ;        $90 = Device done error
+CHKSUM = $31 ; [BYTE] SIO/DCB data frame checsum (single byte sum w/ carry to LSB)
+
+; SIO/DCB Buffers - BUFRLO/BUFRHI - BFENLO/BFENHI = buffer length, in bytes
+
+BUFRLO = $32 ; [BYTE] SIO/DCB buffer address for data transfer (Low byte)
+BUFRHI = $33 ; [BYTE] SIO/DCB buffer address for data transfer (High byte)
+BFENLO = $34 ; [BYTE] SIO/DCB first address after BUFRLO/BUFRHI (Low byte)
+BFENHI = $35 ; [BYTE] SIO/DCB first address after BUFRLO/BUFRHI (High byte)
+
+CRETRY = $36 ; [BYTE] Command frame retries; default $0D (13)
+DRETRY = $37 ; [BYTE] Device retries; default $01 (1)
+
+BUFRFL = $38 ; [BYTE] Flag: Data buffer full - $FF = FULL (flag set)
+RECVDN = $39 ; [BYTE] Flag: Recieve done - $FF = DONE (flag set)
+XMTDON = $3A ; [BYTE] Flag: Transmit done - $FF = DONE (flag set)
+CHKSNT = $3B ; [BYTE] Flag: Checksum sent - $FF = SENT (flag set)
+NOCKSM = $3C ; [BYTE] Non-zero: No Checksum, Zero: Checksum follows
+
+; Cassette I/O
+
+BPTR =   $3D ; [BYTE] Cassette Buffer Pointer; byte index into cassette buffer
+             ;        (values 0 to value in BLIM/$028A).  If BPTR value = BLIM
+             ;        value is EMPTY if READING or FULL if WRITING.  Default $80
+FTYPE =  $3E ; [BYTE] Cassette Inter-Record Gap - $01-$7F (Positive) = Normal,
+             ;        $80-$00 (Negative) = Short (continuous)
+FEOF =   $3F ; [BYTE] Flag: End of File - $00 = Not EOF, Non-zero = EOF
+FREQ =   $40 ; [BYTE] Number of beeps for cassette start - $01 = Play, $02 = Record
+SOUNDR = $41 ; [BYTE] Enable I/O sounds via speaker - $00 = OFF, Non-$00 = ON
+
+; Critical I/O
+
+CRITIC = $42 ; [BYTE] Flag: Critical I/O - $00 = Normal I/O, !$00 = Critical I/O
+             ;        When CRITIC is SET (non-zero):
+             ;           - Deferred VBI is disabled
+             ;             (Immediate VBI is still active)
+             ;           - Software Timers 2, 3, 4 and 5 stop
+             ;           - Keyboard repeat is disabled
+
+; Disk FMS (File Management System) Registers
+
+FMZSPG = $43 ; Byte 1 of 7-byte block of Disk File Management System registers:
+ZBUFP =  $43 ; [WORD] Pointer to the filename for disk I/O
+ZDRVA =  $45 ; [WORD] Drive pointer/sector temporary value
+ZSBA =   $47 ; [WORD] Sector buffer pointer/address
+ERRNO =  $49 ; [BYTE] Disk I/O Error number, FMS default = $9F
+
+; Cassette Boot Flags
+
+CKEY =   $4A ; [BYTE] Cassette Boot Key - Set by holding START during Cold Start
+CASSBT = $4B ; [BYTE] Flag: Cassette Boot - $00 = Cassette boot unsuccessful
+             ;        (See BOOT / $09)
+
+; S: Device Status
+
+DSTAT =  $4C ; [BYTE] S: Device (Screen) Status; used by display handler, and
+             ;        to indicate memory too small for requested screen mode,
+             ;        cursor out of range and BREAK abort status
+
+; Attract Mode - Timers, Flags & Masks
+
+ATRACT = $4D ; [BYTE] Attract Mode Flag - $00 = Attract Mode OFF
+             ;        After no keyboard input for several minutes (about 9,
+             ;        varies with NTSC/PAL) the OS enters Attract Mode (reduces
+             ;        luminance and cycles colors) to prevent CRT burn-in.
+             ;        Set to $00 periodically to defeat attract mode.
+
+DRKMSK = $4E ; [BYTE] Attract Mode Dark Mask - ANDed w/ COLOR values to yield
+             ;        50% luminance (darken the screen) during Attract Mode
+             ;        (see ATRACT).  $FE by default, $F6 in Attract Mode.
+             ;        The LOW NYBBLE of a color byte is the Luminance Value.
+
+COLRSH = $4F ; [BYTE] Attract Mode Color Shift - EORed [XORed] w/ COLOR values to
+             ;        cycle colors during Attract Mode (see ATRACT).  Follows
+             ;        value of RTCLKM ($19), which changes every ~4.27 seconds
+             ;        resulting in a color cycle on that interval.
 
 .endif ; _OS_
