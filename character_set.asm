@@ -284,13 +284,13 @@ MODE67_COLPF3 = %11000000 ; Bits %11 to select color 3
         .align BOUNDARY_1K
 .endm
 
-; SetCharacterSet - Sets the CHBASE to the specified character set address,
+; SetCharacterSet - Sets the CHBAS to the specified character set address,
 ;                   setting the bit map memory location for the character set
 ;                   to be displayed.
 ;
 ; Character Sets must be aligned on a 1K boundary, which means the High byte
 ; of the address is a PAGE number, and the Low byte must be ZERO.  So, this is
-; mostly a convenience macro to set the CHBASE register with a built-in sanity
+; mostly a convenience macro to set the CHBAS register with a built-in sanity
 ; check so I don't do something silly.
 
 .macro SetCharacterSet characterSetAddress
@@ -299,16 +299,20 @@ MODE67_COLPF3 = %11000000 ; Bits %11 to select color 3
                 .error "ERROR: SetCharacterSet requires a Character Set address"
         .endif
 
-        ; If the specified address has a Low byte other than ZERO, then it is
-        ; not aligned on a 1K boundary.
-        .if :<characterSetAddress != 0
+        ; If the specified address has a Low byte other than ZERO, or the Page
+        ; (High Byte) is not a mutliple of 4 then it is not aligned on a
+        ; 1K boundary:
+
+        ; Integer division will give us 0 for page multiples of 4 (4x256 = 1K)
+        ?page = >:characterSetAddress - [[>:characterSetAddress / 4] * 4]
+        .if <:characterSetAddress != 0 || ?page != 0
                 .error "ERROR: SetCharacterSet address is not aligned on a 1K boundary"
-        .endif
+        .endif        
 
-        MacroDebugPrint "Setting CHBASE to: ", :>characterSetAddress
+        MacroDebugPrint "Setting CHBAS to: ", :>characterSetAddress
 
-        lda #>characterSetAddress ; Get the High byte of the address
-        sta CHBASE                ; and put it into CHBASE
+        lda #>:characterSetAddress ; Get the High byte of the address
+        sta CHBAS                 ; and put it into CHBAS
 .endm
 
 .endif ; _CHARACTER_SET_
