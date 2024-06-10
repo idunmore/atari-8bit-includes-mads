@@ -32,7 +32,7 @@ CHACTL = $D401 ; Character display control
 CHBASE = $D409 ; Character Set Base Address (Page Number/High Byte) as CHBASE
                ; must be on a 1K (1024 byte)/$400 boundary.
 
-; ANTIC Character-Related Shawod Registers
+; ANTIC Character-Related Shadow Registers
 
 CHBAS = $02F4 ; CHBASE
 CHART = $02F3 ; CHACTL
