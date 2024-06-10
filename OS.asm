@@ -94,7 +94,40 @@ PTIMOT = $1C ; [BYTE] Printer Timeout (~64 seconds per 60 counts)
 PBPNT  = $1D ; [BYTE] Printer Buffer Pointer; byte index into print buffer
              ;        (values 0 to PBUFSZ
 PBUFSZ = $1E ; [BYTE] Printer Buffer Size (typically 40 bytes for normal lines)
-PTEMP =  $1F ; [BYTE] Temporary register used byt the printer handler for the
+PTEMP =  $1F ; [BYTE] Temporary register used by the printer handler for the
              ;        value of the character being output to the printer
+
+; ZIOCB - Page Zero - "Zero Page" copy of CIO IOCB (at $340-$3BF)
+
+; Values here follow the structure of the IODB at $340-$3BF.  On initiation,
+; CIO operations copy the IOCB to the ZIOCB (here), and when the operation
+; completes, they are copied back to the IOCB (user area).
+
+ICHIDZ = $20 ; [BYTE] Handler Index (into Device Name Table, $FF if nothing open)
+ICDNOZ = $21 ; [BYTE] Device or drive number (MAXDEV in DOS); max number of devices
+ICCOMZ = $22 ; [BYTE] Command (sets what I/O command to perform, and how the
+             ;        IOCB is formatted for that command)
+ICSTAZ = $23 ; [BYTE] IOCB LAST status result
+ICBALZ = $24 ; [BYTE] Buffer address for data transfer (Low byte) OR the address
+             ;        of the file name for commands such as OPEN, STATUS, etc.
+ICBAHZ = $25 ; [BYTE] Buffer address for data transfer (High byte); see ICBALZ
+ICPTLZ = $26 ; [BYTE] Put Byte routine address (Low byte) - the address -1 byte
+             ;        of the the device's "put one byte" routine.  It points to
+             ;        CIO's "IOCB not open" on a CLOSE statement
+ICPTHZ = $27 ; [BYTE] Put Byte routine address (High byte); see ICPTLZ
+ICBLLZ = $28 ; [BYTE] Buffer length byte count for PUT/GET oeprations (Low byte)
+ICBLHZ = $29 ; [BYTE] Buffer length byte count for PUT/GET operations (High byte)
+ICAX1Z = $2A ; [BYTE] Aux Info - Byte 1 - Used by OPEN to specify file access type)
+ICAX2Z = $2B ; [BYTE] Aux Info - Byte 2 - CIO working variable; also used by
+             ;        some serial port functions
+ICAX3Z = $2C ; [BYTE] Aux Info - Byte 3 - Used by BASIC NOTE/POINT commands for
+             ;        transfer of disk sector numbers.
+ICAX4Z = $2D ; [BYTE] Aux Info - Byte 4 - see ICAX3Z
+ICAX5Z = $2E ; [BYTE] Aux Info - Byte 5 - The byte being access with the sector
+             ;        inidcated in ICAZ3Z/4Z.  Also used for hte IOCB * 16 (
+             ;        each ICOB is 16 bytes long)
+ICAX6Z = $2F ; [BYTE] Aux Info - Byte 6 - Spare byte; also labelled CIOCHR -
+             ;        temporary storage for the character byte in the current
+             ;        PUT operation
 
 .endif ; _OS_
