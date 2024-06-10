@@ -5,7 +5,7 @@ These files are a combination of MADS definitions and macros, and 6502 assembly 
 Where appropriate in-file commentary will denote physical and shadow locations/registers, usage, references to source material etc.
 
 ### Attributions
-This work was heavily inspired by, and includes some code and definitions (in particular, various bit-fields/masks, some symbol naming, and type/level of commentary) from, Ken Jenning's excellent "[Atari-Mads-Includes](https://github.com/kenjennings/Atari-Mads-Includes)" project.
+This work was heavily inspired by, and includes some definitions (various bit-fields/masks, some symbol naming, and type/level of commentary) from, Ken Jenning's excellent "[Atari-Mads-Includes](https://github.com/kenjennings/Atari-Mads-Includes)" project.
 
 ### Structure & Contents
 
