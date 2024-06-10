@@ -28,8 +28,8 @@
 DMACTL = $D400 ; DMA control for display and Player/Missile graphics
 DLISTL = $D402 ; Display List Address (Low Byte)
 DLISTH = $D403 ; Display List Address (High Byte)
-HSCROL = $D404 ; Horizontal Fine Scroll (0 to 16 color clocks).
-VSCROL = $D405 ; Vertical Fine Scroll (0 to 16 scan lines).
+HSCROL = $D404 ; Horizontal Fine Scroll (0 to 16 color clocks)
+VSCROL = $D405 ; Vertical Fine Scroll (0 to 16 scan lines)
 WSYNC =  $D40A ; Wait for Horizontal Sync/next scan line
 VCOUNT = $D40B ; (Read) Vertical scan line Counter
 NMIEN =  $D40E ; Non-Maskable Interupt (NMI) Enable
