@@ -23,10 +23,6 @@
 
 ; The first half of page zero ($00-$7F) is reserved for the OS.
 
-; The second half ($80-$FF) is reserved for ROM Cartridges and the
-; floating-point package.  If these are not used, then their respective areas
-; are available for other purposes (user programs).
-
 LINZBS = $00 ; [WORD] LINBUG RAM, replaced by MONITOR RAM (see OS B Listing, P4)
 CASINI = $02 ; [WORD] Cassette BOOT Initialization Vector
              ;        JSR through here if Cassette Boot is successful.
@@ -213,9 +209,112 @@ DRKMSK = $4E ; [BYTE] Attract Mode Dark Mask - ANDed w/ COLOR values to yield
              ;        (see ATRACT).  $FE by default, $F6 in Attract Mode.
              ;        The LOW NYBBLE of a color byte is the Luminance Value.
 
-COLRSH = $4F ; [BYTE] Attract Mode Color Shift - EORed [XORed] w/ COLOR values to
-             ;        cycle colors during Attract Mode (see ATRACT).  Follows
+COLRSH = $4F ; [BYTE] Attract Mode Color Shift - EORed [XORed] w/ COLOR values
+             ;        to cycle colors during Attract Mode (see ATRACT).  Follows
              ;        value of RTCLKM ($19), which changes every ~4.27 seconds
              ;        resulting in a color cycle on that interval.
+
+TEMP =   $50 ; [BYTE] Temporary register for display handler (used in moving
+             ;        data to/from the screen).
+TMPCHR = $50 ; [BYTE] Alias for TEMP
+HOLD1 =  $51 ; [BYTE] Temporary register for display handler (number of display
+             ;        list entries).
+
+; Text Editor/Text Window Values
+
+LMARGN = $52 ; [BYTE] E: Left column margin for text mode (GR.0/ANTIC 2)
+             ;           SCREEN left = 0; DEFAULT margin = 2
+RMARGN = $53 ; [BYTE] E: Right column margin for text mode (GR.0/ANTIC 2)
+             ;           DEFAULT margin = 39 ($27)
+ROWCRS = $54 ; [BYTE] S: Cursor ROW (Y) position for TEXT and GRAPHICS modes
+COLCRS = $55 ; [WORD] S: Cursor COLUMN (X) position for TEXT and GRAPHICS modes
+
+DINDEX = $57 ; [BYTE] S: Current Display/Screen mode
+SAVMSC = $58 ; [WORD] Address of start (top left corner) of screen memory
+
+OLDROW = $5A ; [BYTE] Previous CURSOR ROW (Y) from ROWCRS ($54);
+             ; used for DRAWTO and FILL
+OLDCOL = $5B ; [WORD]Previous CURSOR COLUMN (X) from  COLCRS ($55/$56);
+             ; ysed for DRAWTO and FILL
+OLDCHR = $5D ; [BYTE] Prior value of character at cursor; used to restore
+             ;        character under the cursor after cursor movement
+OLDADR = $5E ; [WORD] Memory location of cursor, used with OLDCHR to restore
+             ;        character under the cursor after cursor movement
+
+; NEWROW & NEWCOL are initialized to the vales in ROWCRS and COLCRS, which
+; represent the destination for DRAWTO and FILL operations.  This is done so
+; that ROWCRS and COLCRS can be modified during these routines:
+
+NEWROW = $60 ; [BYTE] Destination POINT (ROW/Y) for DRAWTO and FILL
+NEWCOL = $62 ; [WORD] Destination POINT (COLUMN/X) for DRAWTO and FILL
+
+LOGCOL = $64 ; [BYTE] Position of CURSOR within a Logical Line, an offset from
+             ;        the first character.  Logical lines can be THREE screen
+             ;        lines (120 characters - 0-119 or $00-$77).
+
+ADRESS = $65 ; [WORD] Temporary storage for display handler for Display List
+             ;        address, line buffer, ROW/COL address, SAVMSC, etc.
+
+MLTTMP = $66 ; [WORD] Multi-use temporary storage; first byte used by OPEN,
+             ;        also used by display hander as temporary storage.
+SAVADR = $68 ; [WORD] Temporary storage, used with ADRESS (above), for saving
+             ;        values during manipulation; used for data under cursor
+             ;        and moving line data on screen.
+
+RAMTOP = $6A ; [BYTE] RAM size, in Pages (of 256/$100 bytes).  Last available
+             ;        RAM location is (RAMTOP * 256) - 1.
+
+BUFCNT = $6B ; [BYTE] E: Buffer Count - current logical line size
+BUFSTR = $6C ; [WORD] Temporary storage; returns character pointed to by 
+             ;        BUFCNT.  Editor GETCH pointer.  Editor Low byte.
+
+BITMSK = $6E ; [BYTE] Bit Mask - in OS bit-mapping routines, also used as a
+             ;        temporary storage register for the display handler.
+
+SHFAMT = $6F ; [BYTE] Pixel justification: the amount to shift the right
+             ;        justified pixel data on output or the amount to shift the
+             ;        input data to right justify it.
+
+ROWAC  = $70 ; [WORD] Row Accumulator - working accumulator for ROW point
+             ;        plotting and ROWINC inc/dec operations
+COLAC  = $72 ; [WORD] Column Accumulator - working accumulator for COLUMN point
+             ;        plotting and COLINC inc/dec operations
+
+ENDPT  = $74 ; [WORD] End point of the line to be drawn.  Contains larger value
+             ;        of DELTAR or DELTAC (below) and used with ROWAC/COLAC
+             ;        when plotting line points.
+DELTAR = $76 ; [BYTE] Delta Row - the ABS value of NEWROW - ROWCRS, used to
+             ;        define the slope of the line to be drawn.
+DELTAC = $77 ; [WORD] Delta Column - the ABS value of NEWCOL - COLCRS, used to
+             ;        define the slope of the line to be drawn.
+
+; ROWINC and COLINC control the direction of the line drawing routine. The
+; values represent the signs derived from the value in NEWROW, minus the value
+; in ROWCRS and the value in NEWCOL minus the value in COLCRS.
+
+ROWINC = $79 ; [BYTE] Row INCrecemet or DECrement value (plus, or minus, 1)
+COLINC = $7A ; [BYTE] Column INCrecemet or DECrement value (plus, or minus, 1)
+
+; SWPFLG - S: text window swap control. Is equal to 255 ($FF) if the text
+; window RAM and regular RAM are swapped; otherwise, it is equal to zero.
+; In split-screen modes, the graphics cursor data and the text window data are
+; frequently swapped in order to get the values associated with the area being
+; accessed into the OS data base locations 84 to 95 ($54 to $5F). SWPFLG helps
+; to keep track of which data set is in these locations.
+
+SWPFLG = $7B ; [BYTE] S: Text window Swap control - $00 = Graphics, $FF = Text 
+HOLDCH = $7C ; [BYTE] S: Character value for shifting - Character is moved here
+             ;        before CTRL or SHIT logic are processed for it.
+INSDAT = $7D ; [BYTE] S: Temporary storage byte used by the display handler for
+             ; the character under the cursor and end of line detection.
+COUNTR = $7E ; [WORD] S: Loop control for line drawing.  Starts out containing
+             ;        the larger value of either DELTAR or DELTAC. This is the
+             ;        number of iterations required to draw a line. As each
+             ;        point on a line is drawn, this value is decremented. When
+             ;        COUNTR equals zero, the line is complete.
+
+; The second half ($80-$FF) is reserved for ROM Cartridges and the
+; floating-point package.  If these are not used, then their respective areas
+; are available for other purposes (user programs).
 
 .endif ; _OS_
