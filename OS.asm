@@ -357,4 +357,17 @@ DEGFLG = $FB ; [BYTE] 0 = Radians (Default), 6 = degrees (also RADFLG)
 FLPTR =  $FC ; [WORD] Pointer to first Floating Point number for operation
 FPTR2 =  $FE ; [WORD] Pointer to second Floating Point number for operation
 
+; PAGE ONE ($100-$1FF) Is the STACK area for the OS, DOS and BASIC.
+;
+; The STACK pushes down from $1FF to $100.
+;
+; STACK overflow results in it wrapping around to $1FF.
+
+; PAGE TWO ($200-$2FF) Various Shadow Registers, Bit Fields, etc.
+
+VDSLST =  $200 ; [WORD] Display List Interrupt Service Routine Vector
+VDSLSTL = $200 ; [BYTE] Display List Interrupt Service Routine Vector (Low Byte)
+VDSLSTH = $201 ; [BYTE] Display List Interrupt Service Routine Vector (High Byte)
+
+
 .endif ; _OS_
