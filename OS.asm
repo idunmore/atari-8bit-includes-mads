@@ -317,4 +317,44 @@ COUNTR = $7E ; [WORD] S: Loop control for line drawing.  Starts out containing
 ; floating-point package.  If these are not used, then their respective areas
 ; are available for other purposes (user programs).
 
+; Floating-Point Package Registers and Values
+
+; Floating point register zero; holds a six-byte internal form of the FP number.
+;
+; The value at locations 212 ($D4) and 213 ($D5) are used to return a two-byte
+; value in the range of zero to 65536($FFFF) to the BASIC program from USR calls
+; (LSB in 212, MSB in 213).
+;
+; The floating point package, if used, requires all locations from 212 ($D4) to
+; 255 ($FF).
+;
+; All six bytes of FRO can be used by a machine language routine, provided FRO
+; isn't used and no FP functions are used by that routine . To use 16 bit values
+; in FP, you would place the two bytes of the number into the least two bytes of
+; FRO (212,213; $D4, $D5), and then do a JSR to $D9AA (55722), which will
+; convert the integer to its FP representation, leaving the result in FRO.
+;
+; To reverse this operation, do a JSR to $D9D2 (55762).
+
+FR0 =    $D4 ; [FLOAT] Floating point register and USR return value to BASIC.
+FRE =    $DA ; [FLOAT] Floating point register (extra) ($DA-$DF)
+FR1 =    $E0 ; [FLOAT] Floating point register 1 ($E0-$E5)
+FR2 =    $E6 ; [FLOAT] Floating point register 2 ($E6-$EB)
+FRX =    $EC ; [BYTE] Spare floating point register
+EEXP =   $ED ; [BYTE] Exponent (E)
+NSIGN =  $EE ; [BYTE] Sign of the floating point NUMBER
+ESIGN =  $EF ; [BYTE] Sign of the floating point EXPONENT
+
+FCHRFL = $F0 ; [BYTE] First Character flag
+DIGRT =  $F1 ; [BYTE] Number of digits to the right of the decimal point
+CIX =    $F2 ; [BYTE] Character index; offset to the input text buffer (INBUFF)
+INBUFF = $F3 ; [WORD] Input for text to BCD conversion, w/ output at LBUFF
+ZTEMP1 = $F5 ; [WORD] Floating point temporary register
+ZTEMP4 = $F7 ; [WORD] Floating point temporary register
+ZTEMP3 = $F9 ; [WORD] Floating point temporary register
+RADFLG = $FB ; [BYTE] 0 = Radians (Default), 6 = degrees (also DEGFLG)
+DEGFLG = $FB ; [BYTE] 0 = Radians (Default), 6 = degrees (also RADFLG)
+FLPTR =  $FC ; [WORD] Pointer to first Floating Point number for operation
+FPTR2 =  $FE ; [WORD] Pointer to second Floating Point number for operation
+
 .endif ; _OS_
