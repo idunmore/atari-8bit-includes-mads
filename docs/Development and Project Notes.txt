@@ -1,3 +1,31 @@
+CURRENT STATUS:
+
+  The status for each of the main files is as follows:
+
+   Custom ICs:
+
+    - ANTIC           - Complete
+    - GTIA            - Not Started
+    - PIA             - Not Started
+    - POKEY           - Not Started
+
+   OS, Cartridges & Utilities/Macros:
+
+    - BASIC           - Complete
+    - OS              - Page ZERO complete
+    - DOS             - Not Started
+    - SIO             - Current part of OS; may break out for isolated use (non-breaking)
+
+    - common          - In Progress (changes only additive)
+    - character_set   - Complete
+    - display_list    - Complete
+    - macro_debugging - Complete (no changes planned, any will be purely additive)
+
+  [Note: "Complete" is relative.  Typically it indicates all documented registers
+  values and so on have been covered.  However, additional work/refinements and/or
+  NON-BREAKING changes in conventions/commentary may be applied.]
+
+<------------------------------------------------------------------------------>
 
 TODOs:
 
@@ -9,10 +37,10 @@ TODOs:
     where the first "inline" sense makes sense vs. the second style:
 
         COUNTR = $7E ; [WORD] S: Loop control for line drawing.  Starts out containing
-                ;        the larger value of either DELTAR or DELTAC. This is the
-                ;        number of iterations required to draw a line. As each
-                ;        point on a line is drawn, this value is decremented. When
-                ;        COUNTR equals zero, the line is complete.
+                     ;        the larger value of either DELTAR or DELTAC. This is the
+                     ;        number of iterations required to draw a line. As each
+                     ;        point on a line is drawn, this value is decremented. When
+                     ;        COUNTR equals zero, the line is complete.
 
       vs.
 
