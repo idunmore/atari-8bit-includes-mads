@@ -10,11 +10,14 @@
 
 ; Include files, to be assembled (and tested).
 
-	icl 'common.asm'
 	icl 'ANTIC.asm'
+	icl 'BASIC.asm'
 	icl 'character_set.asm'
+	icl 'character_set.asm'
+	icl 'common.asm'
 	icl 'display_list.asm'	
 	icl 'macro_debugging.asm'
+	icl 'OS.asm'
 
 ;.def macro_debugging
 
