@@ -1,0 +1,28 @@
+
+TODOs:
+
+  * Currently using a couple of different styles for detailed annotation
+    of various registers and memory location (see below).  NEED to choose a
+    single style, and then update ALL files to follow it.
+
+    Noting that there is probably some cross over point (2 or maybed 3 lines)
+    where the first "inline" sense makes sense vs. the second style:
+
+        COUNTR = $7E ; [WORD] S: Loop control for line drawing.  Starts out containing
+                ;        the larger value of either DELTAR or DELTAC. This is the
+                ;        number of iterations required to draw a line. As each
+                ;        point on a line is drawn, this value is decremented. When
+                ;        COUNTR equals zero, the line is complete.
+
+      vs.
+
+        ; ROWINC and COLINC control the direction of the line drawing routine. The
+        ; values represent the signs derived from the value in NEWROW, minus the value
+        ; in ROWCRS and the value in NEWCOL minus the value in COLCRS.
+
+        ROWINC = $79 ; [BYTE] Row INCrecemet or DECrement value (plus, or minus, 1)
+        COLINC = $7A ; [BYTE] Column INCrecemet or DECrement value (plus, or minus, 1)
+
+  * Make inline punctuation, separators and end-of-line PERIODs consistent, and
+    update for ALL files.
+
