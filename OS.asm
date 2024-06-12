@@ -18,6 +18,15 @@
 ; There is overlap between this file, and those for the custom ICs, but any
 ; conflicts are automatically excluded so these includes can safely be used
 ; in combination.
+;
+; Note: By convention, the hardware registers, vectors and other values only
+;       designate their "type" (length) if they are NOT bytes (e.g. they have
+;       a [WORD] designation).  This is because most such registers have an
+;       explicit L/H suffix register.  The OS memory map does not, so types
+;       [BYTE], [WORD], [FLOAT], [XXbt] are used to clarify the register size.
+;
+;       Shadow Registers that are duplicated from custom IC files do not have
+;       type/size designations and simply refer to their primary definition.
 
 ; Page Zero - "Zero Page" - OS Registers & Vectors
 
@@ -479,7 +488,64 @@ DSKTIM = $0246 ; [BYTE] Disk I/O timeout register
 LINBUF = $0247 ; [40 BYTES] ($0247-$26E) 40 byte character line buffer;
                ;            temporarily buffers one line of text for screen
                ;            editor when it is moving screen data
-               
+
                ;$26E - Last byte of LINBUF buffer
+
+; Don't redefine POKEY shadow registers; the primary IC-specific files
+; (e.g., POKEY.asm) have precedence and more details.
+
+.ifndef _POKEY_
+
+; Paddle Potentiometer (Dial) Shadow Registers
+
+PADDL0 = $0270 ; POT0
+PADDL1 = $0271 ; POT1
+PADDL2 = $0272 ; POT2
+PADDL3 = $0273 ; POT3
+PADDL4 = $0274 ; POT4
+PADDL5 = $0275 ; POT5
+PADDL6 = $0276 ; POT6
+PADDL7 = $0277 ; POT7
+
+.endif ; _POKEY_
+
+; Don't redefine GTIA shadow registers; the primary IC-specific files
+; (e.g., GTIA.asm) have precedence and more details.
+
+.ifndef _GTIA_
+
+GPRIOR = $026F ; PRIOR
+STRIG0 = $0284 ; TRIG0
+STRIG1 = $0285 ; TRIG1
+STRIG2 = $0286 ; TRIG2
+STRIG3 = $0287 ; TRIG3
+
+.endif ; _GTIA_
+
+; Don't redefine PIA shadow registers; the primary IC-specific files
+; (e.g., PIA.asm) have precedence and more details.
+
+.ifndef _PIA_
+
+; Joystick Positions, decoded from PORTA, PORTB - see PIA.asm for position values
+
+STICK0 = $0278 ; Joystick 1 
+STICK1 = $0279 ; Joystick 2 
+STICK2 = $027A ; Joystick 3 
+STICK3 = $027B ; Joystick 4 
+
+; Paddle Triggers (Button) - $00 = Pressed, $01 = Not Pressed
+
+PTRIG0 = $027C ; Paddle 1 Trigger
+PTRIG1 = $027D ; Paddle 2 Trigger
+PTRIG2 = $027E ; Paddle 3 Trigger
+PTRIG3 = $027F ; Paddle 4 Trigger
+PTRIG4 = $0280 ; Paddle 5 Trigger
+PTRIG5 = $0281 ; Paddle 6 Trigger
+PTRIG6 = $0282 ; Paddle 7 Trigger
+PTRIG7 = $0283 ; Paddle 8 Trigger
+
+.endif ; _PIA_
+
 
 .endif ; _OS_
