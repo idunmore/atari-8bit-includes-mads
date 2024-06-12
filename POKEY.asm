@@ -40,6 +40,8 @@ AUDCTL = $D208 ; Audio Control
 
 ; Paddle Potentiometer (Dial) Registers
 
+; Values are 0 for fully clockwise, 228 for fully counter-clockwise.
+
 POT0 =   $D200 ; (Read) Paddle (potentiometer) 0 
 POT1 =   $D201 ; (Read) Paddle (potentiometer) 1 
 POT2 =   $D202 ; (Read) Paddle (potentiometer) 2 
