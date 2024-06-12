@@ -399,6 +399,12 @@ VTIMR4 = $0214 ; [WORD] POKEY Timer 4 interrupt vector
 
 .endif ; _POKEY_
 
+VIMIRQ = $0216 ; [WORD] Immediate IRQ vector.   All IRQs vector through this
+               ;        location. VIMIRQ normally points to the system IRQ
+               ;        handler. You can steal this vector to do your own IRQ
+               ;        Interrupt processing (see IRQEN/IRQST in POKEY.asm).
+
+
 ; System Countdown Timers
 
 ; (Table per Ken Jennings: https://github.com/kenjennings/Atari-Mads-Includes/)
@@ -547,5 +553,206 @@ PTRIG7 = $0283 ; Paddle 8 Trigger
 
 .endif ; _PIA_
 
+; Cassette I/O Shadow Registers
+
+CSTAT =  $0288 ; [BYTE] Cassette Status register.
+WMODE =  $0289 ; [BYTE] Cassette Write mode; $00 = read, $80 (128) = write
+BLIM =   $028A ; [BYTE] Cassette Data Buffer Limit; Number of active bytes in
+               ;        the buffer for the record currently being read/written
+               ;        (see CASBUF and BPTR).  Range is from $00 to $80 (128).
+
+;Five spare bytes at $28B-$28F (may be used by later OS revisions)
+
+TXTROW = $0290 ; [BYTE] E: Text window cursor ROW ($00-$03, window has 4 rows)
+TXTCOL = $0291 ; [WORD] E: Text window cursor COLUMN ($00-$27, window has 40
+               ;        cols). MSB will always be $00
+TINDEX = $0293 ; [BYTE] Split-screen Text Window graphics mode
+TXTMSC = $0294 ; [WORD] Address of first byte of text window when split screen
+               ;        is active (equivalent of SAVMSC for split-screen mode)
+TXTOLD = $0296 ; [6 BYTES] $0296-$029B; Split screen versions of OLDROW [BYTE],
+               ; OLDCOL [WORD], OLDCHR [BYTE], OLDADR [WORD]
+TMPX1 =  $029C ; [BYTE] Temporary register; Scroll Loop Count record
+HOLD3 =  $029D ; [BYTE] Temporary register
+SUBTMP = $029E ; [BYTE] Temporary storage
+HOLD2 =  $029F ; [BYTE] Temporary registers
+
+; DMASK - Pixel Location Mask
+;
+; DMASK contains zereos for all bits in the current byte which do NOT correspond
+; to the pixel to be operated on, and ones for all bits which do correspond.
+
+; Mask     | Modes      | Pixels/Byte (or Bytes/Pixel)
+; -------------------------------------------------------------
+; 11111111 | 0, 1, 2    | One Pixel per Screen Display Byte
+; -------------------------------------------------------------
+; 11110000 | 9, 10, 11  | Two pixels per byte/4 bits per pixel
+; 00001111 |            | (16-color modes)
+; -------------------------------------------------------------
+; 11000000 | 3, 5, 7    | Four pixels per byte/2 bits per pixel
+; 00110000 |            | (4-color modes)
+; 00001100 |            |
+; 00000011 |            |
+; -------------------------------------------------------------
+; 10000000 | 4, 6, 8    | Eight pixels per byte/1 bit per pixel
+; 01000000 |            | (4-color modes)
+; .. to .. |            |
+; 00000001 |            |
+
+DMASK =  $02A0 ; [BYTE] Pixel Location Mask
+
+TMPLBT = $02A1 ; [BYTE] Temporary value for DMASK bit mask
+ESCFLG = $02A2 ; [BYTE] ESCAPE Flag; set to $80 when ESC key pressed,
+               ;        $00 for other characters.
+TABMAP = $02A3 ; [15 BYTES] This is a 120-bit value (one bit per Character for
+               ;            a logical screen line), where a set bit (1) means a
+               ;            TAB is SET for that position, unset (0) = NO TAB          
+
+; LOGMAP - Logical Line Start Bit Map
+
+; These locations map the beginning physical line number for each logical line
+; on the screen (initially 24, for GR.O). Each bit in the first three bytes
+; shows the start of a logical line if the bit equals one (three bytes equals
+; eight bits * three equals 24 lines on the screen).
+; 
+; The map format is as follows:
+
+; Bit      7    6    5    4    3    2    1    0     Byte
+; ------------------------------------------------------
+; Line     0    1    2    3    4    5    6    7      690
+;          8    9   10   11   12   13   14   15      691
+;         16   17   18   19   20   21   22   23      692
+;          -    -    -    -    -    -    -    -      693
+;
+; The last byte is ignored.
+
+LOGMAP = $02B2 ; [4 BYTES]. Logical line start bit map
+
+INVFLG = $02B6 ; [BYTE] E: Inverse Flag - $00 = Normal, $80 = Inverse
+               ;        Note this applies to INPUT (entering characters) NOT
+               ;        the OUTPUT (setting to $80 does not result in PRINTED
+               ;        characters being Inverse.
+               
+FILFLG = $02B7 ; [BYTE] Fill Flag; If operation is FILL, this is set (non-zero)
+               ;        else this is a DRAW operation and this is unset/zero
+TMPROW = $02B8 ; [BYTE] Temporary register for ROW used by ROWCRS
+TMPCOL = $02B9 ; [WORD] Temporary register for COLUMN used by COLCRS
+SCRFLG = $02BB ; [BYTE] Scroll Flag; set if a scroll occurs, contains the number
+               ;        of physical lines within a logical line were removed
+               ;        from the screen (logical lines are up to 3 physical lines
+               ;        so this value ranges from $00-$02 (0-2)
+HOLD4  = $02BC ; [BYTE] Temporary register used by the DRAW command; used to
+               ;        safe/restore the vale in ATACHR during FILL operations
+HOLD5  = $02BD ; [BYTE] Temporary register, same usage as HOLD4
+SHFLOK = $02BE ; [BYTE] Shift and CTRL key flag; $00 for lowercase, $40 for
+               ;        uppercase (SHIFT), $80 for control (CTRL) 
+BOTSCR = $02BF ; [BYTE] Number of rows available for printing; $18 (24) for OS
+               ;        Mode 0, 4 for text windows ands 0 for graphics modes	
+
+; Don't redefine GTIA shadow registers; the primary IC-specific files
+; (e.g., GTIA.asm) have precedence and more details.
+
+.ifndef _GTIA_
+
+; Playfield and Player/Missile Graphics Shadow Registers
+
+PCOLOR0 = $02C0 ; COLPM0
+PCOLOR1 = $02C1 ; COLPM1
+PCOLOR2 = $02C2 ; COLPM2
+PCOLOR3 = $02C3 ; COLPM3
+
+COLOR0 =  $02C4 ; COLPF0
+COLOR1 =  $02C5 ; COLPF1
+COLOR2 =  $02C6 ; COLPF2
+COLOR3 =  $02C7 ; COLPF3
+COLOR4 =  $02C8 ; COLBK
+
+.endif ; _GTIA_
+
+GLBABS  = $02E0 ; [4 BYTES] Global variables, or four spare bytes if DOS is not
+                ;           used (see RUNAD and INITAD below if DOS is present)
+
+; Don't redefine DOS values; the primary system-specific files
+; (e.g., DOS.asm) have precedence and more details.
+
+.ifndef _DOS_
+
+RUNAD =   $02E0 ; RUNAD (see DOS.asm) 
+INITAD =  $02E2 ; INITAD (see DOS.asm)
+
+.endif ; _DOS_
+
+RAMSIZ = $02E4 ; [BYTE] Highest usable Page number (High byte) 
+MEMTOP = $02E5 ; [WORD] Pointer to last byte usable by applications and DOS
+MEMLO =  $02E7 ; [WORD] Pointer to start (bottom) of free memory; first free
+               ;        byte available for program use
+
+; Spare byte at $02E9 (may be used by later OS revisions)
+
+; DVSTAT - Device Status Registers
+
+; There are four device status registers (names for DVSTAB, DVSTTO and DVSTNB
+; are not official).
+;
+; Values for DVSTAT:
+;
+; Bit   Decimal   Error
+;  0       1      Invalid command frame received
+;  1       2      Invalid data frame received
+;  2       4      Output operation was unsuccessful
+;  3       8      Disk is write-protected
+;  4      16      System inactive (on standby)
+;  7     128      Intelligent controller flag
+
+DVSTAT = $02EA ; [BYTE] Command Status & Device ERROR Status
+DVSTAB = $02EB ; [BYTE] Device Status Byte
+DVSTTO = $02EC ; [BYTE] Device Maximum Timeout (in seconds)
+DVSTNB = $02ED ; [BYTE] Number of Bytes (in output buffer)
+
+; Cassette Baud Rate
+
+; Defaults to 600 baud ($05CC), but is adjusted by POKEY in response to actual
+; baud rate (varies due to drive motor speed variation, tape strectch, etc.)
+
+CBAUDL = $02EE ; [BYTE] Cassette Baud (bps) rate (Low byte)
+CBAUDH = $02EF ; [BYTE] Cassette Baud (bps) rate (Highbyte)
+
+CRSINH = $02F0 ; [BYTE] Cursor Inhibit;  $00 = Cursor ON.  Not $00 = Cursor OFF
+KEYDEL = $02F1 ; [BYTE] Key Delay Debounce/Delya Counter. Starts at 3,
+               ; decremented each each frame until 0.
+CH1 =    $02F2 ; [BYTE] Keyboard character code previously in CH -see POKEY.asm)
+
+; Don't redefine ANTIC shadow registers; the primary IC-specific files
+; (e.g., ANTIC.asm) have precedence and more details.
+
+.ifndef _ANTIC_
+
+CHACT  = $02F3 ; CHACT
+CHBAS  = $02F4 ; CHBAS
+
+.endif ; _ANTIC_
+
+;Five spare bytes at $2F5-$2F9 (may be used by later OS revisions)
+
+CHAR   = $02FA ; [BYTE] Internal code for last character value read or written
+               ;        (internal code of ATACHR) 
+ATACHR = $02FB ; [BYTE] Last value read or written at graphics cursor;
+               ;        ATASCII in text modes. Color Number in others
+
+; Don't redefine POKEY shadow registers; the primary IC-specific files
+; (e.g., POKEY.asm) have precedence and more details.
+
+.ifndef _POKEY_
+
+CH = $02FC ; KBCODE
+
+.endif ; _POKEY_
+
+FILDAT = $02FD ; [BYTE] Color for the fill region in the XIO FILL command
+DSPFLG = $02FE ; [BYTE] E: Display Flag, used in display control codes not
+               ;        associated with an ESC character.
+               ;        $00 = Normal operation, !$00 (non-zero) = Display cursor
+               ;        controls instead of acting on them.
+SSFLAG = $02FF ; [BYTE] Start/Stop Display Screen flag (scrolling stop/start
+               ;        control. $00 = Normal scrolling, $FF = Stop scrolling
 
 .endif ; _OS_
