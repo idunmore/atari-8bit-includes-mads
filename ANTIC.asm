@@ -51,10 +51,12 @@ NMIST =  $D40F ; (Read) Non-Maskable Interrupt Status
 SDMCTL = $022F ; DMACTL
 SDLSTL = $0230 ; DLISTL
 SDLSTH = $0231 ; DLISTH
-CHBAS =  $02F4 ; CHBASE
-CHART =  $02F3 ; CHACTL
+
 LPENH =  $0234 ; (Read) PENH
 LPENV =  $0235 ; (Read) PENV
+
+CHBAS =  $02F4 ; CHBASE
+CHART =  $02F3 ; CHACTL
 
 ; DMACTL/SDMTCL - DMA control register for display and Player/Missile graphics
 
