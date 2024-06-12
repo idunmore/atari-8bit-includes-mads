@@ -32,12 +32,12 @@
 ; 4-6    16-64     Serial port mode control
 ;   7      128     Force break; serial output to zero
 
-SKCTL =  $D20F ; [BYTE] Serial Port Control
+SKCTL =  $D20F ; Serial Port Control
 
 
 ; POKEY Shadow Registers & Vectors
 
-POKMSK = $10 ; [BYTE] IRQEN - See POKEY.asm/IRQEN/IRQST for Bit-Settings
+POKMSK = $10 ; IRQEN - See POKEY.asm/IRQEN/IRQST for Bit-Settings
 
 ; I/O Interrupt Vectors
 
