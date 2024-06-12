@@ -53,7 +53,7 @@ APPMHI = $0E ; [WORD] Application Memory High Limit - Top of BASIC program area,
              ;        in a BASIC program (allocation is top-down).
 
 ; Don't redefine POKEY shadow registers; the primary IC-specific files
-; (e.g., POKEY.asm) have precedence.
+; (e.g., POKEY.asm) have precedence and more details.
 
 .ifndef _POKEY_
 
@@ -369,5 +369,117 @@ VDSLST =  $200 ; [WORD] Display List Interrupt Service Routine Vector
 VDSLSTL = $200 ; [BYTE] Display List Interrupt Service Routine Vector (Low Byte)
 VDSLSTH = $201 ; [BYTE] Display List Interrupt Service Routine Vector (High Byte)
 
+VPRCED = $0202 ; [WORD] Peripheral proceed line vector
+VINTER = $0204 ; [WORD] Peripheral interrupt vector.
+VBREAK = $0206 ; [WORD] (6502) BRK instruction ($00) vector; used for setting
+               ;        break points for assembly language debugging
+
+; Don't redefine POKEY shadow registers; the primary IC-specific files
+; (e.g., POKEY.asm) have precedence and more details.
+
+.ifndef _POKEY_
+
+VKEYBD = $0208 ; [WORD] POKEY Keyboard interrupt vector
+VSERIN = $020A ; [WORD] POKEY Serial I/O receive data ready interrupt vector
+VSEROR = $020C ; [WORD] POKEY Serial I/O transmit data ready interrupt vector
+VSEROC = $020E ; [WORD] POKEY Serial bus transmit complete interrupt vector
+
+VTIMR1 = $0210 ; [WORD] POKEY Timer 1 interrupt vector
+VTIMR2 = $0212 ; [WORD] POKEY Timer 2 interrupt vector
+VTIMR4 = $0214 ; [WORD] POKEY Timer 4 interrupt vector
+
+.endif ; _POKEY_
+
+; System Countdown Timers
+
+; (Table per Ken Jennings: https://github.com/kenjennings/Atari-Mads-Includes/)
+
+; TIMER       CDMTV1       CDMTV2       CDMTV3       CDMTV4       CDMTV5
+;---------------------------------------------------------------------------
+; Decrement | Stage 1    | Stage 2    | Stage 2    | Stage 2    | Stage 2
+; in VBI    | (Immediate)| (Deferred) | (Deferred) | (Deferred) | (Deferred)
+;---------------------------------------------------------------------------
+; Interrupt | CDTMA1     | CDTMA2     |            |            |
+; Vector    |            |            |            |            |
+;---------------------------------------------------------------------------
+; Countdown |            |            | CDTMF3     | CDTMF4     | CDTMF5
+; Flag      |            |            |            |            |
+;---------------------------------------------------------------------------       
+; OS Use?   | I/O Timing | No         | Cassette   | No         | No
+;           |            |            | I/O        |            |
+;---------------------------------------------------------------------------
+
+CDTMV1 = $0218 ; [WORD] System Countdown Timer value 1
+CDTMV2 = $021A ; [WORD] System Countdown Timer value 2
+CDTMV3 = $021C ; [WORD] System Countdown Timer value 3
+CDTMV4 = $021E ; [WORD] System Countdown Timer value 4
+CDTMV5 = $0220 ; [WORD] System Countdown Timer value 5
+
+; Vertical Blank Interrupt Vectors
+
+VVBLKI = $0222 ; [WORD] VBLANK Immediate (Stage 1) interrupt vector
+VVBLKD = $0224 ; [WORD] VBLANK Deferred  (Stage 2) interrupt vector
+
+; System Countdown Timer Interrupt Vectors and Flags
+
+CDTMA1 = $0226 ; [WORD] System Countdown Timer 1 vector
+CDTMA2 = $0228 ; [WORD] System Countdown Timer 2 vector
+CDTMF3 = $022A ; [BYTE] Set when CDTMV3 counts down to 0
+SRTIMR = $022B ; [BYTE] keyboard software repeat timer
+CDTMF4 = $022C ; [BYTE] Set when CDTMV4 counts down to 0
+INTEMP = $022D ; [BYTE] Temporary value used by SETVBL
+CDTMF5 = $022E ; [BYTE] Set when CDTMV5 counts down to 0
+
+; Don't redefine ANTIC shadow registers; the primary IC-specific files
+; (e.g., ANTIC.asm) have precedence and more details.
+
+.ifndef _ANTIC_
+
+SDMCTL = $022F ; DMACTL
+SDLSTL = $0230 ; DLISTL
+SDLSTH = $0231 ; DLISTH
+
+LPENH =  $0234 ; (Read) PENH
+LPENV =  $0235 ; (Read) PENV
+
+.endif ; _ANTIC_
+
+; Don't redefine POKEY shadow registers; the primary IC-specific files
+; (e.g., POKEY.asm) have precedence and more details.
+
+.ifndef _POKEY_
+
+SSKCTL = $0232; SKCTL
+
+.endif ; _POKEY_
+
+SPARE  = $233 ; [BYTE] Spare byte (may be used by later OS revisions)
+BRKKY  = $236 ; [WORD] BREAK Key interrupt vector (OS rev. B only)
+
+;Two spare bytes at $238-$239 (may be used by later OS revisions)
+
+; SIO Command Frame - Used during Serial I/O - Not Intended for User Access
+
+CDEVIC = $023A ; [BYTE] SIO Bus ID number
+CCOMND = $023B ; [BYTE] SIO Bus Command Code
+CAUX1 =  $023C ; [BYTE] Command auxiliary byte 1
+CAUX2 =  $023D ; [BYTE] Command auxiliary byte 2
+
+TMPSIO = $023E ; [BYTE] SIO temporary RAM register
+ERRFLG = $023F ; [BYTE] SIO Error flag (any device error, except timeout)
+DFLAGS = $0240 ; [BYTE] Disk flags read from first byte of boot sector (sector 1)
+DBSECT = $0241 ; [BYTE] Number of Boot sectors read (comes from first disk record)
+BOOTAD = $0242 ; [WORD] Address where disk boot loader will be placed
+
+COLDST = $0244 ; [BYTE] Coldstart Flag - $00 = pressing RESET will warmstart,
+               ;                         $01 = pressing RESET will coldstart
+
+DSKTIM = $0246 ; [BYTE] Disk I/O timeout register
+
+LINBUF = $0247 ; [40 BYTES] ($0247-$26E) 40 byte character line buffer;
+               ;            temporarily buffers one line of text for screen
+               ;            editor when it is moving screen data
+               
+               ;$26E - Last byte of LINBUF buffer
 
 .endif ; _OS_
