@@ -235,6 +235,55 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
         .endif        
 .endm
 
+; DL_BLANK - Sets the specified number of blank scan lines.
+
+; Creates the specified number of blank scanlines, using a DL_BLANK_n opcode;
+; allows use of DL_DLI setting either in the form BL_BLANK_n | DL_DLI or by
+; calling DL_BLANK DL_BLANK_n, TRUE | FALSE (for the DLI setting)
+; 
+; This is a "syntactic sugar" macro for DL_BLANK_LINES, for when you want the
+; source code for the display list to be devoid of literal or "magic" numbers,
+; or want to specify the display list using familar ANTIC display list opcodes.
+;
+; For example, DL_BLANK DL_BLANK_8 instead of DL_BLANK_LINES $08
+
+.macro DL_BLANK blankLineOpCode, withDLI
+        ; Sanity/error checking.
+	.if :0 < 1
+		.error "ERROR: DL_BLANK requires a DL_BLANK_n value"
+	.endif
+
+        ?value = [:blankLineOpCode & $0F]
+        .if ?value != 0 
+                .error "ERROR: DL_BLANK invalid mode (low-nybble must be $0): ", :1
+                MacroDebugPrint "blankLineOpCode:", :1
+        .endif
+
+        ; Was a withDLI value specified?
+        .if :0 == 2
+                ; Yes, so just use that.
+                ?dliSet = :withDLI
+                MacroDebugPrint "withDLI:", :withDLI
+        .else
+                ; Not set in the call, so Was the DL_DLI bit set in the opcode?
+                ?dliSet = [:blankLineOpCode & DL_DLI]
+                .if ?dliSet != 0
+                        ?dliSet = TRUE
+                .else
+                        ?dliSet = FALSE
+                .endif
+                MacroDebugPrint "withDLI:", :withDLI
+                MacroDebugPrint "dliSet: ", ?dliSet
+        .endif
+
+        ; Get the number of blank lines to create (exclude the DLI bit, as we
+        ; have already extracted it))
+        ?lines = [[:blankLineOpCode & %01110000] / $10] + 1
+        MacroDebugPrint "lines:", ?lines
+        ; Use our existing blank-lines macro to do the actual output
+        DL_BLANK_LINES ?lines, ?dliSet
+.endm
+
 ; Display List MODE Macros/Instructions
 
 ; DL_MODE - Sets the ANTIC display mode for the current graphics line.
@@ -258,7 +307,7 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
         
         ; :mode is now undisturbed, but validated, so outputting mode as passed
         ; preserves other options.
-        MacroDebugPrint "DL_MODE: ", :mode
+        MacroDebugPrint "DL_MODE:", :mode
 
 	.byte	:mode   ; Output a BYTE for the Display list mode instruction
 .endm
@@ -316,7 +365,7 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
 		.error "ERROR: DL_LMS_MODE requires graphics mode"
 	.endif
        
-        MacroDebugPrint "DL_LMS_MODE: ", [:mode | DL_LMS]
+        MacroDebugPrint "DL_LMS_MODE:", [:mode | DL_LMS]
 
         ; Output the DL_MODE instruction with the DL_LMS bit set.  Doesn't
         ; matter if the mode already has the DL_LMS bit set.	
@@ -335,7 +384,7 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
 		.error "ERROR: DL_LMS_ADDR requires LMS address"
 	.endif
        
-        MacroDebugPrint "DL_LMS_ADDR: ", :address
+        MacroDebugPrint "DL_LMS_ADDR:", :address
 
 	.word :address ; Ouput a WORD for the Memory Scan Address
 .endm
@@ -359,7 +408,7 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
                 .error "DL_JMP: Display List address required"
         .endif
         
-        MacroDebugPrint "DL_JMP: ", :displayListAddress
+        MacroDebugPrint "DL_JMP:", :displayListAddress
 
         ; Output DL_JUMP instruction and operand
 
@@ -379,7 +428,7 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
                 .error "DL_JVB: Display List address required"
         .endif
         
-        MacroDebugPrint "DL_JVB: ", :displayListAddress
+        MacroDebugPrint "DL_JVB:", :displayListAddress
 
         ; Output DL_JVB instruction and operand
 
@@ -398,9 +447,9 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
                 .error "ERROR: InstallDisplayList requires a DL address"
         .endif
 
-        MacroDebugPrint "InstallDisplayList Address:      ", :displayListAddress
-        MacroDebugPrint "InstallDisplayList Address (Lo): ", <:displayListAddress
-        MacroDebugPrint "InstallDisplayList Address (Hi): ", >:displayListAddress
+        MacroDebugPrint "InstallDisplayList Address:     ", :displayListAddress
+        MacroDebugPrint "InstallDisplayList Address (Lo):", <:displayListAddress
+        MacroDebugPrint "InstallDisplayList Address (Hi):", >:displayListAddress
 
         lda #<:displayListAddress ; Get the low byte of the DL address
         sta SDLSTL                ; Update the low byte of the DL vector
@@ -424,9 +473,9 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
                 .error "ERROR: InstallDLI requires a DLI address"
         .endif
 
-        MacroDebugPrint "InstallDLI Address:      ", :dliAddress
-        MacroDebugPrint "InstallDLI Address (Lo): ", <:dliAddress
-        MacroDebugPrint "InstallDLI Address (Hi): ", >:dliAddress
+        MacroDebugPrint "InstallDLI Address:     ", :dliAddress
+        MacroDebugPrint "InstallDLI Address (Lo):", <:dliAddress
+        MacroDebugPrint "InstallDLI Address (Hi):", >:dliAddress
 
         lda #<:dliAddress ; Get the low byte of the DLI address
         sta VDSLSTL       ; Update the low byte of the DLI vector
@@ -459,9 +508,9 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
 		.error "ERROR: ChainDLI: requires nextDLIAddress"
 	.endif
 
-        MacroDebugPrint "ChainDLI: nextDLIAddress:      ", :nextDLIAddress
-        MacroDebugPrint "ChainDLI: nextDLIAddress (Lo): ", <:nextDLIAddress
-        MacroDebugPrint "ChainDLI: nextDLIAddress (Hi): ", >:nextDLIAddress
+        MacroDebugPrint "ChainDLI: nextDLIAddress:     ", :nextDLIAddress
+        MacroDebugPrint "ChainDLI: nextDLIAddress (Lo):", <:nextDLIAddress
+        MacroDebugPrint "ChainDLI: nextDLIAddress (Hi):", >:nextDLIAddress
 
         ; If we only have one argument, then we just stuff in the address
         ; without trying to optimize the number of instructions used.
@@ -481,9 +530,9 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
         ; so we can optimize the code by only updating the high and low bytes
         ; of the next DLI address if they are different.
         .if :0 == 2
-                MacroDebugPrint "ChainDLI: currentDLIAddress:      ", :currentDLIAddress
-                MacroDebugPrint "ChainDLI: currentDLIAddress (Lo): ", <:currentDLIAddress
-                MacroDebugPrint "ChainDLI: currentDLIAddress (Hi): ", >:currentDLIAddress   
+                MacroDebugPrint "ChainDLI: currentDLIAddress:     ", :currentDLIAddress
+                MacroDebugPrint "ChainDLI: currentDLIAddress (Lo):", <:currentDLIAddress
+                MacroDebugPrint "ChainDLI: currentDLIAddress (Hi):", >:currentDLIAddress   
 
                 ; If the same, then no need to change LOW byte.
                 .if <:currentDLIAddress != <:nextDLIAddress 
