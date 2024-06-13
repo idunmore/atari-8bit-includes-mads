@@ -13,11 +13,15 @@
 	icl 'ANTIC.asm'
 	icl 'BASIC.asm'
 	icl 'character_set.asm'
-	icl 'character_set.asm'
 	icl 'common.asm'
-	icl 'display_list.asm'	
+	icl 'display_list.asm'
+	icl 'DOS.asm'
+	icl 'GTIA.asm'
 	icl 'macro_debugging.asm'
 	icl 'OS.asm'
+	icl 'PIA.asm'
+	icl 'POKEY.asm'
+	icl 'vertical_blank.asm'
 
 ;.def macro_debugging
 
