@@ -383,7 +383,7 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
 
         ; Output DL_JVB instruction and operand
 
-	.byte DL_JVB              ; ANTIC JVB instruction
+	.byte DL_JUMP_VB          ; ANTIC JVB instruction
 	.word :displayListAddress ; Address to jump to
 .endm
 
