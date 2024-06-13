@@ -309,7 +309,7 @@ MODE67_COLPF3 = %11000000 ; Bits %11 to select color 3
                 .error "ERROR: SetCharacterSet address is not aligned on a 1K boundary"
         .endif        
 
-        MacroDebugPrint "Setting CHBAS to: ", :>characterSetAddress
+        MacroDebugPrint "Setting CHBAS to: ", >:characterSetAddress
 
         lda #>:characterSetAddress ; Get the High byte of the address
         sta CHBAS                  ; and put it into CHBAS
