@@ -755,4 +755,188 @@ DSPFLG = $02FE ; [BYTE] E: Display Flag, used in display control codes not
 SSFLAG = $02FF ; [BYTE] Start/Stop Display Screen flag (scrolling stop/start
                ;        control. $00 = Normal scrolling, $FF = Stop scrolling
 
+; PAGE THREE ($300-$3FF) Device Handlers, IOCBs, Vectors, etc.
+
+; DDEVIC - Device Serial Bus ID
+;
+;    IDs set by handler; not user-alterable:
+;
+;    Device                      ID   Decimal ID
+;                      
+;    Disk Drives   D1 - D4   $31-$34     (49-52)
+;    Printer       P1            $40        (64)
+;    Printer       P2            $4F        (79)
+;    RS-232 Ports  R1 - R4   $50-$53     (80-83)
+
+DDEVIC = $0300 ; [BYTE] Device serial bus device ID; Set by handler
+DUNIT =  $0301 ; [BYTE] Device unit number; 1 to 4, set by user program
+
+; DCOMND - Device Command
+;
+;    Serial Bus Commands (all are DISK commands, except WRITE and STATUS which
+;    are also PRINTER commands - but with *no veryfy):
+;
+;    Command             ID   Decimal ID
+;
+;    Read               $52         (82)
+;    Write (w/ verify)  $57         (87)
+;    Status             $53         (83)
+;    Put (w/o verify)   $00          (0)
+;    Format             $21         (33)
+;    Download           $20         (32)
+;    Read Address       $54         (84)
+;    Read Spin          $51         (81)
+;    Motor On           $55         (85)
+;    Verify Sector      $56         (86)
+
+DCOMND = $0302 ; [BYTE] Device command set by handler or the user program
+DSTATS = $0303 ; [BYTE] Status code returned to user program, also sets
+               ;        handler's data frame direction for SIO.
+DBUFLO = $0304 ; [BYTE] Data buffer address (Low byte)
+DBUFHI = $0305 ; [BYTE] Data buffer address (High byte)
+DTIMLO = $0306 ; [BYTE] Handler timeout in (approx) seconds
+DUNUSE = $0307 ; [BYTE] Unused byte
+DBYTLO = $0308 ; [BYTE] Number of bytes transferred to/from buffer (Low byte)
+DBYTHI = $0309 ; [BYTE] Number of bytes transferred to/from buffer (High byte)
+DAUX1 =  $030A ; [BYTE] Device specific information (e.g.,  disk sector number) 
+DAUX2 =  $030B ; [BYTE] Device specific information (e.g.,  disk sector number)
+
+TIMER1 = $030C ; [WORD] Intial Baud rate timer value 
+ADDCOR = $030E ; [BYTE] Correction flag for baud rate calculation
+CASFLG = $030F ; [BYTE] SIO Cassette Mode Flag, $00 = Std. SIO, !$00 = Cassette
+TIMER2 = $0310 ; [WORD] End timer for Baud rate; timer 1 and timer 2 contain
+               ;        reference times for the start and end of the fixed bit
+               ;        receive period.  The difference between the two is used
+               ;        is used in a lookup table to calculate updated
+               ;        interval for the baud rate set in CBAUDL/CBAUDH
+TEMP1 =  $0312 ; [WORD] Temporary storage for VCOUNT calculation during Baud
+               ;        rate timer routines.
+TEMP2 =  $0314 ; [BYTE] Temporary storage register
+TEMP3 =  $0315 ; [BYTE] Temporary storage register
+SAVIO =  $0316 ; [BYTE] Save serial data-in port used to detect, and updated
+               ;        after, each bit arrival
+TIMFLG = $0317 ; [BYTE] Timeout flag for Baud rate correction
+STACKP = $0318 ; [BYTE] SIO stack pointer register; points to a byte in the
+               ;        stack being used in the current operation (locations
+               ;        256 to 511 or $100 to $1FF ... i.e., Page ONE
+TSTAT =  $0319 ; [BYTE] Temporary holder for STATUS ($30)
+
+; HATABS - Handler Table Address
+;
+; Thirty-eight bytes are reserved for up to 12 entries of three bytes per
+; handler, the last two bytes being set to zero. The first byte of each entry
+; is the ATASCII code for the handler, the next two bytes are the address of the
+; handler (LSB/MSB or Low/High):
+;
+;   Address       Device             ATASCII ID    OS Vector
+;
+;   $031A (794)   Printer              P (P:)      PRINTV ($E430)
+;   $031D (797)   Cassette             C (C:)      CASETV ($E440)
+;   $0320 (800)   Display Editor       E (E:)      EDITRV ($E400)
+;   $0323 (803)   Screen Handler       S (S:)      SCRENV ($E410)
+;   $0326 (806)   Keyboard Handler     K (K:)      KEYBDV ($E420)
+
+HATABS = $031A ; [38 BYTES] Handler Table Address
+
+; IOCBs - Input/Output Control Blocks and CIO Structures
+;
+; There are 8x IOCBs, each 16 bytes long, structured as follows (each entry is
+; an offset, and should be addded to the IOCBn base address ... e.g., the CIO
+; command for IOCB channel 0 is IOCB0 + ICCMD ($02 + $0340 = $0342) and for
+; IOCB channel 3 is ICBC3 + ICCMD)):
+
+; IOCB CIO Structure [16 BYTES] - Indexes/offsets for each IOCB
+
+ICHID = $00 ; Index into the device name table for current OPEN file,
+            ; $FF when not in use
+ICDNO = $01 ; Device number (e.g., 1-4 for disk drives)
+ICCMD = $02 ; CIO Command - see "CIO Common Device Commands" (below)
+ICSTA = $03 ; Most recently returned CIO Status
+ICBAL = $04 ; Buffer ADDRESS for data transfer (Low byte)
+ICBAH = $05 ; Buffer ADDRESS for data transfer (High byte)
+ICPTL = $06 ; Address of PUT CHAR (put one byte) routine (Low Byte
+ICPTH = $07 ; Address of PUT CHAR (put one byte) routine (High Byte)
+ICBLL = $08 ; Buffer LENGTH; number of bytes to PUT/GET (Low Byte)
+ICBLH = $09 ; Buffer LENGTH; number of bytes to PUT/GET (High Byte)
+ICAX1 = $0A ; Auxiliary Byte 1 (See ICAX1 Options/Open Modes, below)
+ICAX2 = $0B ; Auxiliary Byte 2 (If for S: this is the OS graphics mode number.
+            ; Text Window option is ignored for modes 0, 9, 10, 11)
+ICAX3 = $0C ; Auxiliary Byte 3
+ICAX4 = $0D ; Auxiliary Byte 4  
+ICAX5 = $0E ; Auxiliary Byte 5  
+ICAX6 = $0F ; Auxiliary Byte 6  
+
+IOCB =  $0340 ; IOCB Base Address (also start of IOCB0)
+
+; IOCB - Base Addresses
+
+IOCB0 = IOCB  ; [16 BYTES] IOCB for channel 0
+IOCB1 = $0350 ; [16 BYTES] IOCB for channel 1
+IOCB2 = $0360 ; [16 BYTES] IOCB for channel 2
+IOCB3 = $0370 ; [16 BYTES] IOCB for channel 3
+IOCB4 = $0380 ; [16 BYTES] IOCB for channel 4
+IOCB5 = $0390 ; [16 BYTES] IOCB for channel 5
+IOCB6 = $03A0 ; [16 BYTES] IOCB for channel 6 - Default for GRAPHICS
+IOCB7 = $03B0 ; [16 BYTES] IOCB for channel 7 - Default for LPRINT, LIST, LOAD,
+              ;                                 and SAVE.
+
+PRNBUF = $03C0 ; [40 BYTES] Printer buffer ($03C0-$03E7)
+
+; (Many "CONSTANT" names/IDs per Ken Jennings:
+;  https://github.com/kenjennings/Atari-Mads-Includes/)
+
+; CIO Common Device Commands
+
+CIO_OPEN =       $03
+CIO_GET_RECORD = $05
+CIO_GET_BYTES =  $07
+CIO_PUT_RECORD = $09
+CIO_PUT_BYTES =  $0B
+CIO_CLOSE =      $0C
+CIO_STATUS =     $0D
+CIO_SPECIAL =    $0E
+
+; CIO Device Commands for D:
+
+CIO_D_RENAME =      $20 ; Rename a file
+CIO_D_DELETE =      $21 ; Delete the named file
+CIO_D_LOCK =        $23 ; Lock/protect the file
+CIO_D_UNLOCK =      $24 ; unlock/unprotect the file
+
+CIO_D_POINT =       $25 ; Move to sector/byte position
+CIO_D_NOTE =        $26 ; Get current sector/byte position
+
+CIO_D_FILELEN =     $27 ; Get file length
+CIO_D_CD_MYDOS =    $29 ; MyDos cd (change directory)
+CIO_D_MKDIR_MYDOS = $2A ; MyDos (and SpartaDos) mkdir (make directory)
+CIO_D_RMDIR_SPDOS = $2B ; SpartaDos rmdir (remove directory)
+CIO_D_CD_SPDOS    = $2C ; SpartaDos cd (change directory)
+CIO_D_PWD_MYDOS   = $30 ; MyDos (and SpartaDos) print/get working directory 
+
+CIO_D_FORMAT =      $FE ; Format Disk
+
+; CIO Device Commands for S:
+
+CIO_S_DRAWTO = $11
+CIO_S_FILL =   $12
+
+; ICAX1 Common Options (OPEN modes).
+
+CIO_ICAX_READ      = $04
+CIO_ICAX_WRITE     = $08 ; READ + WRITE starts I/O at first byte.
+CIO_ICAX_READWRITE = $0C ; Conveniently combined CIO_ICAX_READ | CIO_ICAX_WRITE
+
+; ICAX1 Less Common Options (OPEN modes.)
+
+CIO_ICAX_E_FORCED     = $01 ; E: FORCED input. Usually with READ + WRITE.
+CIO_ICAX_D_APPEND     = $01 ; D: Write starts at end of file. Usually with
+                            ;    READ + WRITE.
+CIO_ICAX_D_DIRECTORY  = $02 ; D: DIRECTORY.  Use with READ. 
+CIO_ICAX_S_TEXTWINDOW = $10 ; S: Open graphics mode with text window.
+                            ;    Ignored for 0, 9, 10, 11.
+CIO_ICAX_S_DONOTCLEAR = $20 ; S: Suppress clear screen for graphics mode. 
+
+; $03E8-$03FC [20 BYTES] ar reserved as a spare buffer area.
+
+
 .endif ; _OS_
