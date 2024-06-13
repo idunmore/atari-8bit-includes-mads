@@ -6,6 +6,9 @@
 ; Licensed Under: GNU Lesser Public License v3.0
 ; See: https://github.com/idunmore/atari-8bit-includes-mads/blob/main/LICENSE
 
+; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
+; https://github.com/kenjennings/Atari-Mads-Includes/)
+
 ; Do NOT try and apply these definitions if they are already defined.
 .ifndef _OS_
 
@@ -882,7 +885,7 @@ IOCB7 = $03B0 ; [16 BYTES] IOCB for channel 7 - Default for LPRINT, LIST, LOAD,
 
 PRNBUF = $03C0 ; [40 BYTES] Printer buffer ($03C0-$03E7)
 
-; (Many "CONSTANT" names/IDs per Ken Jennings:
+; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
 ;  https://github.com/kenjennings/Atari-Mads-Includes/)
 
 ; CIO Common Device Commands
@@ -938,5 +941,140 @@ CIO_ICAX_S_DONOTCLEAR = $20 ; S: Suppress clear screen for graphics mode.
 
 ; $03E8-$03FC [20 BYTES] ar reserved as a spare buffer area.
 
+; PAGE FOUR, FIVE and SIX ($400-$FF) Device Handlers, IOCBs, Vectors, etc.
+;
+; Note: No values are defined for PAGE SIX as it is available for user programs,
+;       but there are a range of situationally available contiguous values that
+;       extend into page six, from as low as $480 to as high as $6FF (see below).
+
+CASBUF = $03FD; [128 BYTES] ($03FD-$047F) Cassette buffer for data transfer,
+              ;             starts in page 3 ends in page 4.
+
+; $0480 to $06FF are free if BASIC and FP are not used.
+
+; Floating Point Package Line, Buffer, Argument and Temporary Storage
+
+LBPR1 =  $057E ; [BYTE] LBUFF Prefix 1
+LBPR2 =  $057F ; [BYTE] LBUFF Prefix 2
+LBUFF =  $0580 ; [128 BYTES] ($0580-$05FF) Text buffer for FP/ATASCII conversions
+PLYARG = $05E0 ; Polynomial arguments for Floating Point package
+FPSCR =  $05E6 ; [6 BYTES] ($05E6-$05EB) Floating Point temporary use
+FPSCR1 = $05EC ; [4 BYTES] ($05EC-$05FF) Floating Point temporary use
+
+; PAGE SIX - ($600-$6FF) User Program Area, NOT used by OS, DOS or BASIC.
+
+; Cartridge Area - Cartridge ROM contents are mapped into this area.
+
+; Cartridge A (LEFT) - All Machines
+
+CARTA =  $A000 ; [8129 BYTES] ($A000-$BFFF) Start of Cart A/Left Cart (8K)
+CRASTA = $BFFA ; [WORD] Cartridge A/Left Start address
+CRAFLG = $BFFC ; [BYTE] Cart A/Left present; copied to CTAFLG ($06)
+CRABTF = $BFFD ; [BYTE] Cart A/Left Boot Option bits; $01 = Boot Disk,
+               ;        $04 = Boot Cartridge, $80 = Diagnostic Cartridge 
+CRAINI = $BFFE ; [WORD] Init address for Cart A/Left for cold boot/warm start
+
+; Cartridge B (RIGHT) - Atari 800 ONLY
+
+CARTB =  $8000 ; [8129 BYTES] ($8000-$9FFF) Start of Cart B/Right Cart (8K)
+CRBSTA = $BFFA ; [WORD] Cartridge B/Right Start address
+CRBFLG = $BFFC ; [BYTE] Cart B/Left present; copied to CTBFLG ($07)
+CRBBTF = $BFFD ; [BYTE] Cart B/Right Boot Option bits; $01 = Boot Disk,
+               ;        $04 = Boot Cartridge, $80 = Diagnostic Cartridge 
+CRBINI = $BFFE ; [WORD] Init address for Cart B/Right for cold boot/warm start
+
+; XL OS ROM Character Set 2 - 4 Pages ($CC-$CF ... $CC00-$CFFF)
+
+ROM_CSET_2 = $CC00
+
+; OS Floating Point Package - ; Pages $D8-$DF ($D800-$DFFF)
+
+; Floating Point Routine References:
+;
+;  Page 0 - $D4 to $DB  
+;  Page 5 - $57E to $5FF
+
+; In/Out usually through FR0, and LBUFF
+
+; Floating Point Package Routine Vectors
+
+AFP =    $D800 ; Convert ATASCII to Floating Point
+FASC =   $D8E6 ; Convert Floating Point to ATASCII
+IFP =    $D9AA ; Convert Integer to Floating Point
+FPI =    $D9D2 ; Convert Floating Point to Integer
+ZFRO =   $DA44 ; Zero FR0 - Clear FR0 (sets all bytes to $00)
+ZFR1 =   $DA46 ; Zero FR1 - Clear FR1 (sets all bytes to $00)
+FSUB =   $DA60 ; Subtraction - FR0 minus FR1
+FADD =   $DA66 ; Addition - FR0 plus FR1
+FMUL =   $DADB ; Multiplication - FR0 times FR1
+FDIV =   $DB28 ; Division - FR0 divided by FR1
+PLYEVL = $DD40 ; Evaluate Floating Point Polynomial 
+FLD0R =  $DD89 ; Load FR0 from 6502 X, Y register pointer
+FLD0P =  $DD8D ; Load FR0 from FLPTR
+FLD1R =  $DD98 ; Load FR1 from 6502 X, Y reg pointer
+FLD1P =  $DD9C ; Load FR1 from FLPTR
+FST0R =  $DDA7 ; Store FR0 to address in X, Y registers
+FST0P =  $DDAB ; Store FR0 using FLPTR 
+FMOVE =  $DDB6 ; Move FR0 contents to FR1
+EXP =    $DDC0 ; Exponentiation - Floating Point Base E 
+EXP10 =  $DDCC ; Floating Point Base 10 exponentiations
+LOG =    $DECD ; Floating Point Natural logarithm
+LOG10 =  $DED1 ; Floating Point Base 10 logarithm
+
+; Standard OS ROM Character Set 2 - 4 Pages ($E0-$E3 ... $E000-$E3FF)
+
+ROM_CSET = $E000
+
+; OS ROM Vectors
+
+; Device handler vectors specify:
+;
+;   Open 
+;   Close 
+;   Get Byte 
+;   Put Byte 
+;   Get Special
+;   JMP to handler init routine
+
+EDITRV = $E400 ; Screen editor vector table
+SCRENV = $E410 ; Screen vector table
+KEYBDV = $E420 ; Keyboard vector table
+PRINTV = $E430 ; Printer vector table
+CASETV = $E440 ; Cassette vector table
+
+DISKIV = $E450 ; JMP vector for disk handler initialization
+DSKINV = $E453 ; JMP vector for disk handler interface
+
+CIOV =   $E456 ; JSR vector for CIO; all CIO operations go through this address
+SIOV =   $E459 ; JMP vector for SIO.
+
+; JSR to set Vertical Blank Interupt Vector/Timer values:
+;
+;   Y register is the LSB of vector/routine or timer value.
+;   X register is the MSB of vector/routine or timer value.
+;   A register is the number of the Vertical Blank routine to change:
+;
+;     1 == CDTMV1 - decremented Immediate VBI Stage 1 -- JSR to CDTMA1 $0226
+;     2 == CDTMV2 - decremented Immediate VBI Stage 2 -- JSR to CDTMA2 $0228
+;     3 == CDTMV3 - decremented Immediate VBI Stage 2 -- Zero CDTMF3 $022A
+;     4 == CDTMV4 - decremented Immediate VBI Stage 2 -- Zero CDTMF4 $022C
+;     5 == CDTMV5 - decremented Immediate VBI Stage 2 -- Zero CDTMF5 $022E
+;     6 == Immediate VBI
+;     7 == Deferred VBI
+
+SETVBV = $E45C ; JSR Vector to set timers
+
+; User Immediate VBI routine should end by a JMP to this address 
+; to continue the OS Vertical Blank routine
+
+SYSVBV = $E45F ; JMP to end user Immediate VBI
+
+; User Deferred VBI routine should end by a JMP to this address 
+; to continue the OS Vertical Blank routine
+
+XITVBV = $E462 ; JMP Vector to end user Deferred VBI
+
+WARMSV = $E474 ; JMP or Usr() here will warmstart the system
+COLDSV = $E477 ; JMP or Usr() here to cold boot the system
 
 .endif ; _OS_
