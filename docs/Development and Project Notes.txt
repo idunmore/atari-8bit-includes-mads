@@ -19,7 +19,7 @@ CURRENT STATUS:
     - character_set   - Complete
     - display_list    - Complete
     - macro_debugging - Complete
-    - vertical_blank  - Just started; registers (from OS etc.) and macros still required
+    - vertical_blank  - Complete
 
   [Note: "Complete" is relative.  Typically it indicates all documented registers
   values and so on have been covered.  However, additional work/refinements and/or
