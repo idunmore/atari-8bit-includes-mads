@@ -1074,6 +1074,11 @@ SYSVBV = $E45F ; JMP to end user Immediate VBI
 
 XITVBV = $E462 ; JMP Vector to end user Deferred VBI
 
+; VBI Modes
+
+VBI_IMMEDIATE = $06 ; Immediate VBI
+VBI_DEFERRED  = $07 ; Deferred VBI
+
 WARMSV = $E474 ; JMP or Usr() here will warmstart the system
 COLDSV = $E477 ; JMP or Usr() here to cold boot the system
 
