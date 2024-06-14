@@ -309,10 +309,20 @@ MODE67_COLPF3 = %11000000 ; Bits %11 to select color 3
                 .error "ERROR: SetCharacterSet address is not aligned on a 1K boundary"
         .endif        
 
-        MacroDebugPrint "Setting CHBAS to: ", >:characterSetAddress
+        MacroDebugPrint "Setting CHBAS to:", >:characterSetAddress
 
         lda #>:characterSetAddress ; Get the High byte of the address
         sta CHBAS                  ; and put it into CHBAS
+.endm
+
+; SetFont - Contextual Alias for SetCharacterSet
+
+; This is a convenience macro to allow the programmer to use SetFont instead
+; of SetCharacterSet the programmer prefers to think in terms of FONTS.
+
+.macro SetFont fontAddress
+        ; Do the work using our existing SetCharacterSet macro
+        SetCharacterSet :fontAddress
 .endm
 
 .endif ; _CHARACTER_SET_
