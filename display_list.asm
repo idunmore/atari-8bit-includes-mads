@@ -496,6 +496,19 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
         sta NMIEN                  ; Enable the DLI NMI
 .endm
 
+; SetDLI - Installs a Display List Interrupt (DLI) at the specified address;
+;          alias for InstallDLI.
+;
+; Installs a Display List Interrupt (DLI) service routine at the specified
+; address, and ENABLES both DL and VB interrupts (since VBIs are enabled by
+; default).
+;
+; Do not use this macro if you need different NMI settings (e.g., no VBI).
+.macro SetDLI dliAddress
+        MacroDebugPrint "SetDLI: Address:", :dliAddress
+        InstallDLI :dliAddress
+.endm
+
 ; DisableDLI - Disables Display List Interrupts (DLIs).
 ;
 ; Disables all Display List Interrupts (DLIs) by setting the NMIEN register
