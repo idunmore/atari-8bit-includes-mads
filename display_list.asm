@@ -457,6 +457,16 @@ DL_BLANK_8 = $70 ; 8 Blank scan lines
         sta SDLSTH                ; Update the high byte of the DLIvector
 .endm
 
+; SetDisplayList - "Installs" a Display List at the specified address; alias
+;                  for InstallDisplayList.
+;
+; Points ANTIC to a Display List at the specified address.  Changes occur on
+; the next Vertical Blank (VBI).
+.macro SetDisplayList displayListAddress
+        MacroDebugPrint "SetDisplayList: Address:", :displayListAddress
+        InstallDisplayList :displayListAddress
+.endm
+
 ; Display List Interrupt (DLI) Macros
 
 ; InstallDLI - Installs a Display List Interrupt (DLI) at the specified address.
