@@ -6,6 +6,9 @@
 ; Licensed Under: GNU Lesser Public License v3.0
 ; See: https://github.com/idunmore/atari-8bit-includes-mads/blob/main/LICENSE
 
+; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
+; https://github.com/kenjennings/Atari-Mads-Includes/)
+
 ; Includes
 
         icl 'common.asm'
@@ -42,7 +45,7 @@ PBCTL = $D303 ; Port B Control
 ;      (10/$0A) 1010     |     0110 (6/$06)
 ;                   \    |    /
 ;                    \   |   /
-;                     \  |  /
+;                     \ 15  /
 ; (11/$0B) 1011 ------ 1111  ------ 0111 (7/$07)
 ;                     /($0F)\
 ;                    /   |   \
@@ -67,5 +70,85 @@ PTRIG5 = $0281 ; Paddle 6 Trigger
 PTRIG6 = $0282 ; Paddle 7 Trigger
 PTRIG7 = $0283 ; Paddle 8 Trigger
 
-.endif ; _PIA_
+; Shadow Register Joystick Positions
 
+; These are the "direct", one-per-position, values for reading joystick
+; positions via STICKn (vs. the bit-position masks below).
+;
+; Use the "STICK_RIGHT", "STICK_LEFT", "STICK_UP", "STICK_DOWN" masks if you
+; want to test for, say, "all UP" positions in a single comparison.  Use the
+; direct values if you want to test for a specific position.
+
+STICK_POS_CENTER =     $0F
+STICK_POS_UP =         $0E
+STICK_POS_DOWN =       $0D
+STICK_POS_LEFT =       $0B
+STICK_POS_RIGHT =      $07
+STICK_POS_UP_LEFT =    $0A
+STICK_POS_UP_RIGHT =   $06
+STICK_POS_DOWN_LEFT =  $09
+STICK_POS_DOWN_RIGHT = $05
+
+; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
+; https://github.com/kenjennings/Atari-Mads-Includes/)
+
+; MASK_JACK is about referencing the actual hardware registers. You can do this
+; if you want to, however the OS already separates the joysticks into individual
+; OS registers and value (STICKn), so there's not a lot of reason to read the
+; joystick hardware directly.
+
+MASK_JACK_1 = %00001111 ; Keeps bits from 1st controller in pair.
+MASK_JACK_2 = %11110000 ; Inverse mask; keeps bits from 2nd controller in pair.
+MASK_JACK_3 = %00001111 ; Keeps bits from 1st controller in pair.
+MASK_JACK_4 = %11110000 ; Inverse mask; keeps bits from 2nd controller in pair.
+
+; Note that 0 bit is pressed.  1 bit is not pressed.
+
+; Reading "JACK" (PORTA, PORTB) registers gives two joystick values. The
+; joystick's bits in the high nybble should be right shifted into the low nybble
+; for testing. Or just use the STICKn shadow register as that is its purpose.
+
+; Bits for STICKn Shadow Registers
+
+MASK_STICK_RIGHT = %11110111
+MASK_STICK_LEFT =  %11111011
+MASK_SITCK_UP =    %11111101
+MASK_STICK_DOWN =  %11111110
+
+; AND with STICKn; If $00, then pressed. If $01, then not pressed.
+
+STICK_RIGHT = %00001000 
+STICK_LEFT =  %00000100
+SITCK_UP =    %00000010
+STICK_DOWN =  %00000001
+
+; PACTL and PBCTL
+
+MASK_PORT_SERIAL_IRQ =   %01111111 ; (Read)
+MASK_MOTOR_CONTROL =     %11110111 ; PACTL Peripheral motor control (cassette)
+MASK_COMMAND_IDENT =     %11110111 ; PBCTL Peripheral command identification
+MASK_PORT_ADDRESSING =   %11111011 ; PACTL #00 = Port direction control,
+                                   ; $01 = Read port.
+MASK_SERIAL_IRQ_ENABLE = %11111110
+
+PORT_SERIAL_IRQ =   %10000000 ; (Read)
+MOTOR_CONTROL =     %00001000 ; PACTL
+COMMAND_IDENT =     %00001000 ; PBCTL
+PORT_ADDRESSING =   %00000100
+SERIAL_IRQ_ENABLE = %00000001
+
+; PBCTL for the XL
+
+MASK_SELECT_OS_ROM =      %11111110 ; Turn OS ROM on and off
+MASK_SELECT_BASIC_ROM =   %11111101 ; Turn BASIC ROM on and off
+MASK_LED_1_KEYBOARD =     %11111011 ; 1200XL LED 1, enable/disable keyboard
+MASK_LED_2_INTL_CHARSET = %11110111 ; 1200XL LED 2, enable international character set
+MASK_SELF_TEST_ROM =      %01111111 ; Expose Self Test at $5000
+
+SELECT_OS_ROM =      %00000001
+SELECT_BASIC_ROM =   %00000010
+LED_1_KEYBOARD =     %00000100
+LED_2_INTL_CHARSET = %00001000
+SELF_TEST_ROM =      %10000000
+
+.endif ; _PIA_
