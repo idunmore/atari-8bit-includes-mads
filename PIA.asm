@@ -37,17 +37,19 @@ PBCTL = $D303 ; Port B Control
 ; above.  Each joystick position yields one of 9 values: $0F (%1111) for
 ; centered, then 8 values for each of the 45-degree increments [(dec) binary]:
 ;
-;                  (14)
-;                  1110
-;      (10) 1010     |     0110 (6)
-;               \    |    /
-;                \   |   /
-; (11) 1011 ------ 1111 ------ 0111 (7)
-;                /   |   \
-;               /    |    \
-;           1001     |     0101 (5)
-;                  1101
-;                  (13)
+;                    (14/$0E)
+;                      1110
+;      (10/$0A) 1010     |     0110 (6/$06)
+;                   \    |    /
+;                    \   |   /
+;                     \  |  /
+; (11/$0B) 1011 ------ 1111  ------ 0111 (7/$07)
+;                     /($0F)\
+;                    /   |   \
+;                   /    |    \
+;       (9/$09) 1001     |     0101 (5/$05)
+;                      1101
+;                    (13/$0D)
 
 STICK0 = $0278 ; Joystick 1 (decoded from PORTA)
 STICK1 = $0279 ; Joystick 2 (decoded from PORTA)
