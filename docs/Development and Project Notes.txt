@@ -5,7 +5,7 @@ CURRENT STATUS:
    Custom ICs:
 
     - ANTIC           - Complete
-    - GTIA            - Hardware and shadow registers done; needs MASKs, BITs etc.
+    - GTIA            - Complete
     - PIA             - Complete
     - POKEY           - Complete
 

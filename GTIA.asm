@@ -5,6 +5,9 @@
 ;
 ; Licensed Under: GNU Lesser Public License v3.0
 ; See: https://github.com/idunmore/atari-8bit-includes-mads/blob/main/LICENSE
+;
+; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
+; https://github.com/kenjennings/Atari-Mads-Includes/)
 
 ; Includes
 
@@ -127,5 +130,186 @@ COLOR2 =  $02C6 ; COLPF2
 COLOR3 =  $02C7 ; COLPF3
 COLOR4 =  $02C8 ; COLBK
 
-.endif ; _GTIA_
+; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
+; https://github.com/kenjennings/Atari-Mads-Includes/)
 
+; MASKs and Bit-Settings for GTIA Registers, Functions and Interrupts
+
+; Don't redefine COLOR/LUMA masks/bit settings; the specific files
+; (e.g., color.asm) have precedence and more details.
+.ifndef _COLORS_
+
+;COLOR (HUE) and LUMA Masks
+
+HUE_BITS =   %11110000 ; And to preserve HUE and exclude LUMA
+COLOR_BITS = %11110000 ; AND to preserve HUE and exclude LUMA
+LUMA_BITS =  %00001111 ; AND to preserve LUMA and exclude HUE
+
+.endif ; _COLORS_
+
+; Detect NTSC/PAL
+
+MASK_NTSCPAL_BITS =%00001110 ; Clear (xxxx000x) = PAL/SECAM,
+                             ; Set (xxxx111x) = NTSC
+
+; SIZEP0 - SIZEP3
+
+PLAYER_SIZE_BITS = %00000011
+PM_SIZE_NORMAL =   %00000000 ; One color clock per Player/Missile pixel
+PM_SIZE_DOUBLE =   %00000001 ; Two color clocks per Player/Missile pixel
+PM_SIZE_QUAD =     %00000011 ; Four color clocks per Player/Missile pixel
+
+; SIZEM and GRAFM (and missile memory)
+
+MASK_MISSILE0_BITS = %11111100
+MASK_MISSILE1_BITS = %11110011
+MASK_MISSILE2_BITS = %11001111
+MASK_MISSILE3_BITS = %00111111
+
+MISSILE0_BITS =      %00000011
+MISSILE1_BITS =      %00001100
+MISSILE2_BITS =      %00110000
+MISSILE3_BITS =      %11000000
+
+; Collisions MxPF, MxPL, PxPF, PxPL
+; COLPMx or COLPFx where X is bits 0 through 3
+
+MASK_COLPMF0_BIT = %11111110 ; Player or Missile v Player or Playfield color 0
+MASK_COLPMF1_BIT = %11111101 ; Player or Missile v Player or Playfield color 1
+MASK_COLPMF2_BIT = %11111011 ; Player or Missile v Player or Playfield color 2
+MASK_COLPMF3_BIT = %11110111 ; Player or Missile v Player or Playfield color 3
+
+COLPMF0_BIT =      %00000001 ; Player or Missile v Player or Playfield color 0
+COLPMF1_BIT =      %00000010 ; Player or Missile v Player or Playfield color 1
+COLPMF2_BIT =      %00000100 ; Player or Missile v Player or Playfield color 2
+COLPMF3_BIT =      %00001000 ; Player or Missile v Player or Playfield color 3
+
+
+; PRIOR and GPRIOR - Control Priority, Fifth Player and GTIA modes
+
+MASK_PRIORITY =      %11110000 ; Player/Missile, Playfield priority
+MASK_FIFTH_PLAYER =  %11101111 ; Enable/Disable Fifth Player
+MASK_MULTICOLOR_PM = %11011111 ; Enable/Disable Player color mixing
+MASK_GTIA_MODE =     %00111111 ; Enable/Disable GTIA playfield modes
+;
+PRIORITY_BITS =      %00001111 ; Player/Missile, Playfield priority
+FIFTH_PLAYER =       %00010000 ; Enable Fifth Player
+MULTICOLOR_PM =      %00100000 ; Enable Player color mixing
+;
+GTIA_MODE_DEFAULT =  %00000000 ; Normal CTIA color interpretation
+GTIA_MODE_16_SHADE = %01000000 ; 16 shades of background color (COLBK)
+GTIA_MODE_9_COLOR =  %10000000 ; 9 colors from registers, COLPM0 is background
+GTIA_MODE_16_COLOR = %11000000 ; 16 hues of brightness of background color (COLBK)
+
+; Player/Missile to Playfield priority values:
+
+;+============+=========+=========+=========+=========+=========+
+;| Priority   | 0 0 0 1 | 0 0 1 0 | 0 1 0 0 | 1 0 0 0 | 0 0 0 0 |
+;| Bits [3:0] |  = $1   |  = $2   |  = $4   |  = $8   |  = $0*  |
+;+============+=========+=========+=========+=========+=========+
+;|        Top | PM0     | PM0     | P5/PF0  | P5/PF0  | PM0     |
+;|            | PM1     | PM1     |    PF1  |    PF1  | PM1     |
+;|            | PM2     | P5/PF0  |    PF2  | PM0     | P5/PF0  |
+;|            | PM3     |    PF1  |    PF3  | PM1     |    PF1  |
+;|            | P5/PF0  |    PF2  | PM0     | PM2     | PM2     |
+;|            |    PF1  |    PF3  | PM1     | PM3     | PM3     |
+;|            |    PF2  |  PM2    | PM2     |    PF2  |    PF2  |
+;|            |    PF3  |  PM3    | PM3     |    PF3  |    PF3  |
+;|     Bottom |  COLBK  |  COLBK  |  COLBK  |  COLBK  |  COLBK  |
+;+============+=========+=========+=========+=========+=========+
+;
+; * $0 is Special - Priority 0 results in color merging:
+;
+;     PM0/PM1 + PF0/PF1 OR together to generate different colors.
+;     PM2/PM3 + PF2/PF3 OR together to generate different colors.
+
+
+; VDELAY - Delay PM DMA to render 2 scan line Player data one scan line lower 
+
+MASK_VD_MISSILE0 = %11111110
+MASK_VD_MISSILE1 = %11111101
+MASK_VD_MISSILE2 = %11111011
+MASK_VD_MISSILE3 = %11110111
+MASK_VD_PLAYER0 =  %11101111
+MASK_VD_PLAYER1 =  %11011111
+MASK_VD_PLAYER2 =  %10111111
+MASK_VD_PLAYER3 =  %01111111
+
+VD_MISSILE0 =      %00000001
+VD_MISSILE1 =      %00000010
+VD_MISSILE2 =      %00000100
+VD_MISSILE3 =      %00001000
+VD_PLAYER0 =       %00010000
+VD_PLAYER1 =       %00100000
+VD_PLAYER2 =       %01000000
+VD_PLAYER3 =       %10000000
+
+; GRACTL - Enable/Disable Player/Missile DMA to GRAFxx registers.
+;          And latch triggers.
+
+MASK_ENABLE_MISSILES = %11111110 ; Enable/Disable Missile DMA to GRAFM register
+MASK_ENABLE_PLAYERS =  %11111101 ; Enable/Disable Player DMA to GRAFPx registers
+MASK_TRIGGER_LATCH =   %11111011 ; Enable/Disable jostick trigger latching
+
+ENABLE_MISSILES =      %00000001 ; Enable Missile DMA to GRAFM register
+ENABLE_PLAYERS =       %00000010 ; Enable Player DMA to GRAFPx registers
+TRIGGER_LATCH =        %00000100 ; Enable joystick trigger latching
+
+; CONSOL and CONSPK
+
+; 0 bit is key pressed, so AND "masking" is not really useful.
+; Better to just AND with the single bit for each of the 3 keys.
+
+MASK_CONSOLE_KEYS =    %11111000
+MASK_CONSOLE_START =   %11111110 ; Start button
+MASK_CONSOLE_SELECT =  %11111101 ; Select button
+MASK_CONSOLE_OPTION =  %11111011 ; Option button
+MASK_CONSOLE_SPEAKER = %11110111 ; (Write) Keyboard speaker
+
+CONSOLE_KEYS =         %00000111 ; Capture only the function keys.
+CONSOLE_START =        %00000001 ; Start button
+CONSOLE_SELECT =       %00000010 ; Select button
+CONSOLE_OPTION =       %00000100 ; Option button
+CONSOLE_SPEAKER =      %00001000 ; (Write) Keyboard speaker
+
+; Sizes in horizontal color clocks and vertical scan lines
+
+PLAYFIELD_COLORCLOCKS_NARROW = $80 ; Color Clocks Narrow Width = 128 ($80)
+PLAYFIELD_COLORCLOCKS_NORMAL = $A0 ; Color Clocks Normal Width = 160 ($A0)
+PLAYFIELD_COLORCLOCKS_WIDE =   $B0 ; Color Clocks Wide Width   = 176 ($B0)
+
+PLAYFIELD_LEFT_EDGE_NARROW = $40 ; First/left-most color clock horizontal position
+PLAYFIELD_LEFT_EDGE_NORMAL = $30
+PLAYFIELD_LEFT_EDGE_WIDE =   $28
+
+PLAYFIELD_RIGHT_EDGE_NARROW = $BF ; Last/right-most color clock horizontal position
+PLAYFIELD_RIGHT_EDGE_NORMAL = $CF
+PLAYFIELD_RIGHT_EDGE_WIDE =   $D7
+
+; PMBASE offsets to Player or Missile addresses
+
+PMADR_2LINE_MISSILES = $180 
+PMADR_2LINE_PLAYER0 =  $200
+PMADR_2LINE_PLAYER1 =  $280
+PMADR_2LINE_PLAYER2 =  $300
+PMADR_2LINE_PLAYER3 =  $380
+
+PMADR_1LINE_MISSILES = $300
+PMADR_1LINE_PLAYER0 =  $400
+PMADR_1LINE_PLAYER1 =  $500
+PMADR_1LINE_PLAYER2 =  $600
+PMADR_1LINE_PLAYER3 =  $700
+
+; Vertical Alignments - screen scanlines are offsets into PMADR memory locations
+
+PM_2LINE_OVERSCAN_TOP =    $04
+PM_2LINE_NORMAL_TOP =      $10 ; For default OS 192 scan line display
+PM_2LINE_NORMAL_BOTTOM =   $6F ; For default OS 192 scan line display
+PM_2LINE_OVERSCAN_BOTTOM = $7B
+
+PM_1LINE_OVERSCAN_TOP =    $08
+PM_1LINE_NORMAL_TOP =      $20 ; For default OS 192 scan line display
+PM_1LINE_NORMAL_BOTTOM =   $DF ; For default OS 192 scan line display
+PM_1LINE_OVERSCAN_BOTTOM = $F7
+
+.endif ; _GTIA_
