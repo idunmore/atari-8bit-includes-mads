@@ -10,10 +10,14 @@
 
 ; Include files, to be assembled (and tested).
 
+;.def macro_debugging
+
+	icl 'common.asm'
+
 	icl 'ANTIC.asm'
 	icl 'BASIC.asm'
 	icl 'character_set.asm'
-	icl 'common.asm'
+	icl 'colors.asm'	
 	icl 'display_list.asm'
 	icl 'DOS.asm'
 	icl 'GTIA.asm'
@@ -23,13 +27,12 @@
 	icl 'POKEY.asm'
 	icl 'vertical_blank.asm'
 
-;.def macro_debugging
-
 ; A simple assembly program, that provides a valid org and entry point for
 ; the assembler, can execute in an emulator, and can be used to test the
 ; various aspects of other files in a transient manner.
 
-	org $2000 ; We'll start here.
+
+	org $2000 ; We'll start here.	
 
 	DL_TOP_OVERSCAN
 	DL_BLANK_LINES 18, 1

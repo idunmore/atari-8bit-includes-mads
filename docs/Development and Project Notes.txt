@@ -7,7 +7,7 @@ CURRENT STATUS:
     - ANTIC           - Complete
     - GTIA            - Hardware and shadow registers done; needs MASKs, BITs etc.
     - PIA             - Complete
-    - POKEY           - Hardware and shadow registers done; needs MASKs, BITs etc.
+    - POKEY           - Complete
 
    OS, Cartridges & Utilities/Macros:
 
@@ -15,6 +15,7 @@ CURRENT STATUS:
     - OS              - Complete
     - DOS             - RUNAD & INITAD done; needs remainder of vectors and tables.
     
+    - colors          - NTSC and PAL Color Constant Definitions
     - common          - In Progress (changes only additive)
     - character_set   - Complete
     - display_list    - Complete
