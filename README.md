@@ -24,10 +24,10 @@ This work was heavily inspired by, and includes many definitions (various bit-fi
 
 Additionally, there will be macros and definitions to make it easier to create/define/setup (and tear-down) specific Atari 8-bit features such as Display Lists, Display List Interrupts, Vertical Blank Interrupts, Player/Missile Graphics and so on:
 
-- character_set - Character values, equates and macros for managing character sets/fonts
-- colors - Color definitions for NTSC and PAL (with assembly-time value substitution) and color handling macros
-- display_list - Macros, equates, values, etc. for creating Display Lists and handling Display List Interrupts
-- vertical_blank - Macros, equates, values, etc. for handling Vertical Blank Interrupts
+- **character_set** - Character values, equates and macros for managing character sets/fonts
+- **colors** - Color definitions for NTSC and PAL (with assembly-time value substitution) and color handling macros
+- **display_list** - Macros, equates, values, etc. for creating Display Lists and handling Display List Interrupts
+- **vertical_blank** - Macros, equates, values, etc. for handling Vertical Blank Interrupts
 
 ### Usage
 
