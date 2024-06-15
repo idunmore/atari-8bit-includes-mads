@@ -6,7 +6,7 @@
 ; Licensed Under: GNU Lesser Public License v3.0
 ; See: https://github.com/idunmore/atari-8bit-includes-mads/blob/main/LICENSE
 
-; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
+; (Many "CONSTANT" names/IDs, values, masks and commentary per Ken Jennings:
 ; https://github.com/kenjennings/Atari-Mads-Includes/)
 
 ; Includes
@@ -89,7 +89,7 @@ STICK_POS_UP_RIGHT =   $06
 STICK_POS_DOWN_LEFT =  $09
 STICK_POS_DOWN_RIGHT = $05
 
-; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
+; (Many "CONSTANT" names/IDs, values, masks and commentary per Ken Jennings:
 ; https://github.com/kenjennings/Atari-Mads-Includes/)
 
 ; MASK_JACK is about referencing the actual hardware registers. You can do this

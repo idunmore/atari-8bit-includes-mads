@@ -5,8 +5,8 @@
 ;
 ; Licensed Under: GNU Lesser Public License v3.0
 ; See: https://github.com/idunmore/atari-8bit-includes-mads/blob/main/LICENSE
-;
-; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
+
+; (Many "CONSTANT" names/IDs, values, masks and commentary per Ken Jennings:
 ; https://github.com/kenjennings/Atari-Mads-Includes/)
 
 ; Includes
@@ -165,7 +165,7 @@ PADDL7 = $0277 ; POT7
 
 CH = $02FC ; KBCODE
 
-; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
+; (Many "CONSTANT" names/IDs, values, masks and commentary per Ken Jennings:
 ; https://github.com/kenjennings/Atari-Mads-Includes/)
 
 ; MASKs and Bit-Settings for POKEY Registers, Functions and Interrupts

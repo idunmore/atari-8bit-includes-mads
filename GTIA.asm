@@ -5,8 +5,8 @@
 ;
 ; Licensed Under: GNU Lesser Public License v3.0
 ; See: https://github.com/idunmore/atari-8bit-includes-mads/blob/main/LICENSE
-;
-; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
+
+; (Many "CONSTANT" names/IDs, values, masks and commentary per Ken Jennings:
 ; https://github.com/kenjennings/Atari-Mads-Includes/)
 
 ; Includes
@@ -130,7 +130,7 @@ COLOR2 =  $02C6 ; COLPF2
 COLOR3 =  $02C7 ; COLPF3
 COLOR4 =  $02C8 ; COLBK
 
-; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
+; (Many "CONSTANT" names/IDs, values, masks and commentary per Ken Jennings:
 ; https://github.com/kenjennings/Atari-Mads-Includes/)
 
 ; MASKs and Bit-Settings for GTIA Registers, Functions and Interrupts
@@ -222,7 +222,6 @@ GTIA_MODE_16_COLOR = %11000000 ; 16 hues of brightness of background color (COLB
 ;
 ;     PM0/PM1 + PF0/PF1 OR together to generate different colors.
 ;     PM2/PM3 + PF2/PF3 OR together to generate different colors.
-
 
 ; VDELAY - Delay PM DMA to render 2 scan line Player data one scan line lower 
 

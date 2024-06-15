@@ -6,6 +6,9 @@
 ; Licensed Under: GNU Lesser Public License v3.0
 ; See: https://github.com/idunmore/atari-8bit-includes-mads/blob/main/LICENSE
 
+; (Many "CONSTANT" names/IDs, values, masks and commentary per Ken Jennings:
+; https://github.com/kenjennings/Atari-Mads-Includes/)
+
 ; Includes
 
         icl 'common.asm'

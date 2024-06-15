@@ -6,8 +6,9 @@
 ; Licensed Under: GNU Lesser Public License v3.0
 ; See: https://github.com/idunmore/atari-8bit-includes-mads/blob/main/LICENSE
 
-; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
+; (Many "CONSTANT" names/IDs, values, masks and commentary per Ken Jennings:
 ; https://github.com/kenjennings/Atari-Mads-Includes/)
+
 
 ; Do NOT try and apply these definitions if they are already defined.
 .ifndef _OS_
@@ -885,8 +886,8 @@ IOCB7 = $03B0 ; [16 BYTES] IOCB for channel 7 - Default for LPRINT, LIST, LOAD,
 
 PRNBUF = $03C0 ; [40 BYTES] Printer buffer ($03C0-$03E7)
 
-; (Many "CONSTANT" names/IDs and commentary per Ken Jennings:
-;  https://github.com/kenjennings/Atari-Mads-Includes/)
+; (Many "CONSTANT" names/IDs, values, masks and commentary per Ken Jennings:
+; https://github.com/kenjennings/Atari-Mads-Includes/)
 
 ; CIO Common Device Commands
 
