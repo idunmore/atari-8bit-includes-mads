@@ -29,7 +29,6 @@ PAGE_BOUNDARY = $100
 BOUNDARY_1K   = $400
 BOUNDARY_2K   = $800
 
-CHBASE_BOUNDARY = BOUNDARY_1K ; 1K boundary for Character Sets (CHBASE)
 PMBASE_BOUNDARY = BOUNDARY_2K ; 2K boundary for Player/Missile Graphics (PMBASE)
 
 ; TV/Color Standards (for "tv_standard" label)

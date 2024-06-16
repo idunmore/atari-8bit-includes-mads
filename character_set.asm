@@ -276,6 +276,10 @@ MODE67_COLPF1 = %01000000 ; Bits %01 to select color 1
 MODE67_COLPF2 = %10000000 ; Bits %10 to select color 2
 MODE67_COLPF3 = %11000000 ; Bits %11 to select color 3
 
+; Character Set Alignment (1K Boundary)
+
+CHBASE_BOUNDARY = BOUNDARY_1K ; 1K boundary for Character Sets (CHBASE)
+
 ; Character Set Macros
 
 ; AlignCharacterSet - Aligns the current memory location to a 1K boundary.
@@ -284,7 +288,7 @@ MODE67_COLPF3 = %11000000 ; Bits %11 to select color 3
 ; need for the programmer to know what boundary is required.
 
 .macro AlignCharacterSet
-        .align BOUNDARY_1K
+        .align CHBASE_BOUNDARY
 .endm
 
 ; SetCharacterSet - Sets the CHBAS to the specified character set address,
