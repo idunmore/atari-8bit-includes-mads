@@ -16,7 +16,7 @@
 
 ; Do NOT try and apply these definitions if they are already defined.
 .ifndef _COLORS_
-
+        
 ; Sentinel to allow detection of prior INCLUSION
 .def _COLORS_
 
@@ -29,13 +29,13 @@
 ;
 ; Sixteen HUEs are available with 8 LUMINANCE valies each, for 128 total colors.
 
-;COLOR (HUE) and LUMA Masks
+; COLOR (HUE) and LUMA Masks
 
 HUE_BITS =   %11110000 ; And to preserve HUE and exclude LUMA
 COLOR_BITS = %11110000 ; AND to preserve HUE and exclude LUMA
 LUMA_BITS =  %00001111 ; AND to preserve LUMA and exclude HUE
 
-;COLOR (HUE) Definitions/Names
+; COLOR (HUE) Definitions/Names
 
 ; COLOR "NAMES" include those described in "Mapping the Atari (p.164) and from
 ; Ken Jennings' equates (https://github.com/kenjennings/Atari-Mads-Includes/)
@@ -59,7 +59,7 @@ LUMA_BITS =  %00001111 ; AND to preserve LUMA and exclude HUE
 ; If no TV standard (NTSC or PAL) is defined, we will default to NTSC.
 .if [tv_standard == NTSC] .or [.not .def tv_standard]
 
-;NTSC Color Values
+; NTSC Color Values
         
 ; Per Mapping the Atari (p.164)
 COLOR_BLACK =            $00
@@ -101,7 +101,7 @@ COLOR_LITE_ORANGE =  $F0
 
 .else ; .not .def tv_standard
 
-;PAL Color Values
+; PAL Color Values
 
 ; Per Mapping the Atari (p.164)
 COLOR_BLACK =            $00
