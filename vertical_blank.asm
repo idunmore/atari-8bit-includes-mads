@@ -53,11 +53,11 @@ VBI_DEFERRED  = $07 ; Deferred VBI
 
 .macro SetVBI vbiAddress, vbiMode
         ; Sanity/error checking.
-        if :0 != 2
+        .if :0 != 2
                 .error "ERROR: SetVBI requires a VBI service routine address and mode"
         .endif
 
-        if :vbiMode != VBI_IMMEDIATE && :vbiMode != VBI_DEFERRED
+        .if :vbiMode != VBI_IMMEDIATE && :vbiMode != VBI_DEFERRED
                 .error "ERROR: Invalid VBI mode"
         .endif
         MacroDebugPrint "vbiAddress:", :vbiAddress
