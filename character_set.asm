@@ -291,18 +291,24 @@ CHBASE_BOUNDARY = BOUNDARY_1K ; 1K boundary for Character Sets (CHBASE)
         .align CHBASE_BOUNDARY
 .endm
 
-; SetCharacterSet - Sets the CHBAS to the specified character set address,
+; SetCharacterSet - Sets CHBAS or CHBASE to the specified character set address,
 ;                   setting the bit map memory location for the character set
 ;                   to be displayed.
 ;
+; If :immediate = TRUE, sets the hardware register CHBASE so the character set
+; changes immediately, but CHBASE will be reset to CHBAS on the next VBI.
+;
+; If :immediate is not specified, or is FALSE, then this sets CHBAS, which is
+; persistent, but won't update the actual character set until the next VBI.
+;
 ; Character Sets must be aligned on a 1K boundary, which means the High byte
 ; of the address is a PAGE number, and the Low byte must be ZERO.  So, this is
-; mostly a convenience macro to set the CHBAS register with a built-in sanity
+; mostly a convenience macro to set the CHBAS(E) register with a built-in sanity
 ; check so I don't do something silly.
 
-.macro SetCharacterSet characterSetAddress
+.macro SetCharacterSet characterSetAddress, immediate
         ; Sanity/error checking.
-        .if :0 != 1
+        .if :0 < 1
                 .error "ERROR: SetCharacterSet requires a Character Set address"
         .endif
 
@@ -316,10 +322,32 @@ CHBASE_BOUNDARY = BOUNDARY_1K ; 1K boundary for Character Sets (CHBASE)
                 .error "ERROR: SetCharacterSet address is not aligned on a 1K boundary"
         .endif        
 
-        MacroDebugPrint "Setting CHBAS to:", >:characterSetAddress
-
+        ; Emit the requried code ...
         lda #>:characterSetAddress ; Get the High byte of the address
-        sta CHBAS                  ; and put it into CHBAS
+
+        ; If immediate is set, then we need to set the CHBASE register, otherwise
+        ; we can set CHBAS (shadow register) and let the VBI set CHBASE.
+        .if :0 == 2 && :immediate == TRUE
+                MacroDebugPrint "Setting CHBASE to:", >:characterSetAddress
+                sta CHBASE ; Put address (page) into CHBAS
+        .else
+                MacroDebugPrint "Setting CHBAS to:", >:characterSetAddress
+                sta CHBAS ; Put address (page) into CHBAS
+        .endif
+.endm
+
+; SetCharSetImmediate - Contextual Alias for SetCharacterSet, that sets the
+;                       character set immediately.
+
+.macro SetCharSetImmediate characterSetAddress
+        SetCharacterSet :characterSetAddress, TRUE
+.endm
+
+; SetCharSetDeferred - Contextual Alias for SetCharacterSet, that sets the character set
+;                      at the next VBI.
+
+.macro SetCharSetDeferred characterSetAddress
+        SetCharacterSet :characterSetAddress, FALSE
 .endm
 
 ; SetFont - Contextual Alias for SetCharacterSet
@@ -327,9 +355,29 @@ CHBASE_BOUNDARY = BOUNDARY_1K ; 1K boundary for Character Sets (CHBASE)
 ; This is a convenience macro to allow the programmer to use SetFont instead
 ; of SetCharacterSet the programmer prefers to think in terms of FONTS.
 
-.macro SetFont fontAddress
+.macro SetFont fontAddress, immediate
+        SetCharacterSet :fontAddress, :immediate
+.endm
+
+; SetFontImmediate - Contextual Alias for SetCharacterSet, that sets the font
+;                    immediately.
+
+; This is a convenience macro to allow the programmer to use SetFont instead
+; of SetCharacterSet the programmer prefers to think in terms of FONTS.
+
+.macro SetFontImmediate fontAddress
+        SetCharacterSet :fontAddress, TRUE
+.endm
+
+; SetFontDeferred - Contextual Alias for SetCharacterSet, that sets the font
+;                    immediately.
+
+; This is a convenience macro to allow the programmer to use SetFont instead
+; of SetCharacterSet the programmer prefers to think in terms of FONTS.
+
+.macro SetFontDeferred fontAddress
         ; Do the work using our existing SetCharacterSet macro
-        SetCharacterSet :fontAddress
+        SetCharacterSet :fontAddress, FALSE
 .endm
 
 .endif ; _CHARACTER_SET_
