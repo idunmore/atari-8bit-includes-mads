@@ -22,6 +22,7 @@
 	icl 'DOS.asm'
 	icl 'GTIA.asm'
 	icl 'macro_debugging.asm'
+	icl 'math.asm'
 	icl 'OS.asm'
 	icl 'PIA.asm'
 	icl 'POKEY.asm'
