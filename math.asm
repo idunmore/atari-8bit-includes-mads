@@ -11,7 +11,16 @@
 ; Sentinel to allow detection of prior INCLUSION
 .def _MATH_
 
+; Some of these macros do similar things to some built-in MADS macros, e.g.,
+; INW does the same thing as IncWord, AddByteToWord and AddWordToWord do the
+; same thing as ADB/ADW - albiet they emit different 6502 code to do it.
+;
+; These aren't meant to replace the built-in MADS macros, they just provide
+; a "more obviously a macro" way to do them, with some additional context,
+; error chcking, and more descriptive names.
+
 ; IncWord - Increment a 16-bit value, stored at wordAddress, by 1
+;           Similar to MAD's INW/inw macro.
 
 .macro IncWord wordAddress
         ; Use AddByteToWord to increment by 1
@@ -20,6 +29,7 @@
 .endm ; IncWord
 
 ; AddByteToWord - Adds a byte value to the 16-bit value stored at wordAddress
+;                 Similar to MAD's ADB/adb macro.
 
 .macro AddByteToWord wordAddress, value
         ; Sanity/error checking
@@ -42,6 +52,7 @@
 .endm ; AddByteToWord
 
 ; AddWordToWord - Adds a 16-bit value to the 16-bit value stored at wordAddress
+;                 Similar to MAD's ADW/adw macro.
 
 .macro AddWordToWord wordAddress, value
         ; Sanity/error checking
