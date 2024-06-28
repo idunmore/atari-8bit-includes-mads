@@ -28,7 +28,14 @@ FALSE = 0
 PAGE_BOUNDARY = $100
 BOUNDARY_1K   = $400
 BOUNDARY_2K   = $800
+BOUNDARY_4K  = $1000
 
+ANTIC_BOUNDARY =  BOUNDARY_4K ; 4K boundary for ANTIC screen data (this is not
+                              ; required; screen memory does not have to start
+                              ; on a 4K boundary, it just can't CROSS one, so
+                              ; this gives you the largest contiguous block
+                              ; before you have to LMS to a new block).
+                              
 PMBASE_BOUNDARY = BOUNDARY_2K ; 2K boundary for Player/Missile Graphics (PMBASE)
 
 ; TV/Color Standards (for "tv_standard" label)
