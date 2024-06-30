@@ -129,6 +129,7 @@ COLOR1 =  $02C5 ; COLPF1
 COLOR2 =  $02C6 ; COLPF2
 COLOR3 =  $02C7 ; COLPF3
 COLOR4 =  $02C8 ; COLBK
+COLBAK =  $02C8 ; COLBK
 
 ; (Many "CONSTANT" names/IDs, values, masks and commentary per Ken Jennings:
 ; https://github.com/kenjennings/Atari-Mads-Includes/)
